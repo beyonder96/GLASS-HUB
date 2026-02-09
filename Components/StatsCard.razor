@@ -1,0 +1,55 @@
+<div class="relative p-6 rounded-[32px] glass-panel hover:shadow-2xl hover:bg-white/80 dark:hover:bg-zinc-900/50 hover:border-white/60 dark:hover:border-white/20 hover:-translate-y-1 cursor-pointer group overflow-hidden"
+     @onclick="OnClick">
+    
+    <!-- Glass Reflection/Noise -->
+    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+    <div class="flex flex-col h-full justify-between gap-6 relative z-10">
+        <!-- Top Row: Icon + Trend -->
+        <div class="flex justify-between items-start">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center @BgColorClass @TextColorClass group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-current/5">
+                @Icon
+            </div>
+
+            @if (!string.IsNullOrEmpty(Trend))
+            {
+                <div class="px-3 py-1 rounded-full bg-white/30 dark:bg-white/5 border border-white/20 dark:border-white/10 text-zinc-600 dark:text-zinc-300 text-[10px] font-bold tracking-wider uppercase backdrop-blur-md">
+                    @Trend.ToUpper()
+                </div>
+            }
+        </div>
+
+        <!-- Bottom Row: Value + Title -->
+        <div>
+            <p class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight leading-none mb-2 group-hover:scale-[1.02] transition-transform origin-left">@Value</p>
+            <h3 class="text-xs font-bold text-slate-500 dark:text-zinc-500 tracking-wider uppercase">@Title</h3>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public string Color { get; set; } = "blue"; 
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public string? Trend { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    // Using the "accent color" logic described: 
+    // Indigo (Pay), Rose (Overdue), Emerald (Done), Amber (Warning/Time)
+    private string BgColorClass => Color switch {
+        "blue" => "bg-indigo-50/80 dark:bg-indigo-500/10 ring-1 ring-indigo-500/20", 
+        "red" => "bg-rose-50/80 dark:bg-rose-500/10 ring-1 ring-rose-500/20", 
+        "green" => "bg-emerald-50/80 dark:bg-emerald-500/10 ring-1 ring-emerald-500/20", 
+        "yellow" => "bg-amber-50/80 dark:bg-amber-500/10 ring-1 ring-amber-500/20", 
+        _ => "bg-zinc-50"
+    };
+
+    private string TextColorClass => Color switch {
+        "blue" => "text-indigo-600 dark:text-indigo-400",
+        "red" => "text-rose-600 dark:text-rose-400",
+        "green" => "text-emerald-600 dark:text-emerald-400",
+        "yellow" => "text-amber-600 dark:text-amber-400",
+        _ => "text-zinc-600"
+    };
+}

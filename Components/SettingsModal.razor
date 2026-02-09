@@ -1,0 +1,208 @@
+@using GlassHub.Services
+
+@inject SettingsService SettingsService
+@inject IJSRuntime JSRuntime
+
+@if (IsOpen)
+{
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fade-in">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" @onclick="Close"></div>
+        
+        <!-- Modal Container -->
+        <div class="relative w-full max-w-4xl h-[600px] bg-white dark:bg-[#09090b] rounded-[32px] shadow-2xl overflow-hidden flex flex-row animate-fade-in-up">
+            
+            <!-- Close Button -->
+            <button @onclick="Close" class="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 dark:text-zinc-600 transition-colors z-[60]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+
+            <!-- Sidebar -->
+            <div class="w-64 flex-none bg-slate-50 dark:bg-zinc-900 border-r border-slate-100 dark:border-white/5 p-6 pt-16 flex flex-col gap-2 relative z-50">
+                <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-6 px-2">Configurações</h2>
+                
+                <button @onclick="@(() => ActiveTab = "PROFILE")" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all text-left @(ActiveTab == "PROFILE" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30" : "text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-white/5")">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Perfil & Segurança
+                </button>
+                
+                <button @onclick="@(() => ActiveTab = "FINANCE")" 
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all text-left @(ActiveTab == "FINANCE" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30" : "text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-white/5")">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                    Financeiro
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 p-8 md:p-12 pb-32 overflow-y-auto relative min-w-0">
+                @if (ActiveTab == "PROFILE")
+                {
+                    <div class="max-w-md mx-auto space-y-8">
+                        <!-- Avatar -->
+                        <div class="flex flex-col items-center mb-8">
+                             <div class="relative group cursor-pointer w-28 h-28 rounded-full bg-slate-100 dark:bg-zinc-900 ring-4 ring-white dark:ring-zinc-800 shadow-xl overflow-hidden flex items-center justify-center">
+                                @if (!string.IsNullOrEmpty(UserAvatar))
+                                {
+                                    <img src="@UserAvatar" class="w-full h-full object-cover" />
+                                }
+                                else
+                                {
+                                    <span class="text-4xl font-bold text-slate-300 dark:text-zinc-500">@GetInitials(UserName)</span>
+                                }
+                                <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                     <InputFile OnChange="HandleFileSelected" accept=".jpg,.png,.jpeg" class="absolute inset-0 opacity-0 cursor-pointer" />
+                                </div>
+                             </div>
+                             <p class="text-xs font-medium text-slate-400 mt-3">Clique para alterar a foto</p>
+                        </div>
+
+                        <!-- User Info -->
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nome de Exibição</label>
+                                <input type="text" @bind="UserName" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white transition-all font-medium" />
+                            </div>
+
+                            <div class="pt-6 border-t border-slate-100 dark:border-zinc-800 space-y-4">
+                                <div class="flex items-center gap-2 text-slate-800 dark:text-white font-bold text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    Alterar Senha
+                                </div>
+                                
+                                <input type="password" placeholder="Senha Atual" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white transition-all" />
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="password" placeholder="Nova Senha" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white transition-all" />
+                                    <input type="password" placeholder="Confirmar Senha" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white transition-all" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (ActiveTab == "FINANCE")
+                {
+                     <div class="max-w-md mx-auto space-y-8">
+                         <!-- Buffer -->
+                         <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                     Buffer Diário (R$)
+                                 </label>
+                                 <span class="text-lg font-bold text-indigo-600 dark:text-indigo-400">@Buffer.ToString("N2")</span>
+                            </div>
+                            <div class="p-6 bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-slate-100 dark:border-zinc-800">
+                                 <input type="range" min="0" max="5000" step="50" @bind="Buffer" @bind:event="oninput" class="w-full h-2 bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                                 <div class="flex justify-between mt-3 text-[10px] text-slate-400 uppercase font-bold tracking-widest">
+                                     <span>R$ 0</span>
+                                     <span>R$ 2.500</span>
+                                     <span>R$ 5.000</span>
+                                 </div>
+                                 <p class="text-xs text-slate-500 dark:text-zinc-500 mt-4 leading-relaxed">
+                                     Este valor será somado automaticamente ao seu fluxo de caixa diário como uma reserva de segurança.
+                                 </p>
+                            </div>
+                         </div>
+
+                         <!-- Strategy -->
+                         <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-zinc-800">
+                              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Estratégia de Feriados</label>
+                              <div class="grid grid-cols-1 gap-3">
+                                   <div @onclick="@(() => Strategy = "POSTPONE")" class="cursor-pointer p-4 rounded-xl border-2 transition-all flex items-center gap-4 @(Strategy == "POSTPONE" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" : "border-slate-100 dark:border-zinc-800 hover:border-slate-200 dark:hover:border-zinc-700")">
+                                        <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center @(Strategy == "POSTPONE" ? "border-indigo-600" : "border-slate-300 dark:border-zinc-600")">
+                                             @if(Strategy == "POSTPONE") { <div class="w-2.5 h-2.5 bg-indigo-600 rounded-full" /> }
+                                        </div>
+                                        <div>
+                                             <p class="font-bold text-sm text-slate-800 dark:text-white">Postergar Pagamento</p>
+                                             <p class="text-xs text-slate-500">Pagar no próximo dia útil</p>
+                                        </div>
+                                   </div>
+
+                                   <div @onclick="@(() => Strategy = "ADVANCE")" class="cursor-pointer p-4 rounded-xl border-2 transition-all flex items-center gap-4 @(Strategy == "ADVANCE" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" : "border-slate-100 dark:border-zinc-800 hover:border-slate-200 dark:hover:border-zinc-700")">
+                                        <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center @(Strategy == "ADVANCE" ? "border-indigo-600" : "border-slate-300 dark:border-zinc-600")">
+                                             @if(Strategy == "ADVANCE") { <div class="w-2.5 h-2.5 bg-indigo-600 rounded-full" /> }
+                                        </div>
+                                        <div>
+                                             <p class="font-bold text-sm text-slate-800 dark:text-white">Antecipar Pagamento</p>
+                                             <p class="text-xs text-slate-500">Pagar no dia anterior</p>
+                                        </div>
+                                   </div>
+                              </div>
+                         </div>
+                     </div>
+                }
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="absolute bottom-0 left-0 right-0 md:pl-64 p-6 bg-white dark:bg-zinc-900 backdrop-blur-md border-t border-slate-100 dark:border-white/5 flex justify-end gap-3 z-40">
+                <button @onclick="Close" class="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors text-sm">
+                    Cancelar
+                </button>
+                <button @onclick="Save" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-colors text-sm shadow-lg shadow-indigo-500/30 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Salvar Alterações
+                </button>
+            </div>
+
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    private string ActiveTab = "PROFILE";
+    
+    // Form State
+    private string UserName = "";
+    private string? UserAvatar;
+    private decimal Buffer = 0;
+    private string Strategy = "POSTPONE";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsOpen)
+        {
+            // Sync with Service when opening
+            await SettingsService.InitializeAsync();
+            UserName = SettingsService.UserName;
+            UserAvatar = SettingsService.UserAvatar;
+            Buffer = SettingsService.DailyBuffer;
+            Strategy = SettingsService.HolidayStrategy;
+        }
+    }
+
+    private async Task Save()
+    {
+        await SettingsService.SaveSettingsAsync(UserName, UserAvatar, Buffer, Strategy);
+        await Close();
+    }
+
+    private async Task Close()
+    {
+        IsOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+    }
+    
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var resizedFile = await file.RequestImageFileAsync(file.ContentType, 300, 300);
+            var buffer = new byte[resizedFile.Size];
+            await resizedFile.OpenReadStream().ReadAsync(buffer);
+            UserAvatar = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+        }
+    }
+    
+    private string GetInitials(string name)
+    {
+         if (string.IsNullOrEmpty(name)) return "G";
+         return name.Substring(0, 1).ToUpper();
+    }
+}

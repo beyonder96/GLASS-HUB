@@ -1,0 +1,24 @@
+@using GlassHub.Models
+
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border @CssClass">
+    @if(Status == PaymentStatus.PAID) {
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        <span>Pago</span>
+    } else if (Status == PaymentStatus.OVERDUE) {
+        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+        <span>Atrasado</span>
+    } else {
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+        <span>Pendente</span>
+    }
+</span>
+
+@code {
+    [Parameter] public PaymentStatus Status { get; set; }
+
+    private string CssClass => Status switch {
+        PaymentStatus.PAID => "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400",
+        PaymentStatus.OVERDUE => "bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/20 dark:border-rose-800 dark:text-rose-400",
+        _ => "bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-400"
+    };
+}

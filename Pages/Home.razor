@@ -1,0 +1,262 @@
+﻿@page "/"
+@inject IExpenseService ExpenseService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<div class="space-y-8 animate-fade-in relative z-10 pb-32">
+    
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <a href="/notas?filter=pending">
+            <StatsCard Title="Total a Pagar" Value="@FormatCurrency(ExpenseService.GetTotalPayable())" Color="blue">
+                <Icon>
+                    <!-- Wallet Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+                </Icon>
+            </StatsCard>
+        </a>
+
+        <a href="/notas?filter=overdue">
+            <StatsCard Title="Vencido" Value="@FormatCurrency(ExpenseService.GetTotalOverdue())" Color="red">
+                <Icon>
+                    <!-- Alert Triangle Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                </Icon>
+            </StatsCard>
+        </a>
+
+        <a href="/notas?filter=paid">
+            <StatsCard Title="Realizado" Value="@FormatCurrency(ExpenseService.GetTotalPaid())" Color="green">
+                <Icon>
+                    <!-- Check Circle Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </Icon>
+            </StatsCard>
+        </a>
+
+        <a href="/notas?filter=next7days">
+            <StatsCard Title="Próx. 7 Dias" Value="@ExpenseService.GetUpcomingCount(7).ToString()" Color="yellow" Trend="@(ExpenseService.GetUpcomingCount(7) > 0 ? "Crítico" : "")">
+                <Icon>
+                    <!-- Clock Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </Icon>
+            </StatsCard>
+        </a>
+    </div>
+    
+    <!-- Chart Section -->
+    <div class="p-6 md:p-8 rounded-[32px] glass-panel">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Análise de Fluxo</h3>
+                <p class="text-sm text-slate-400 dark:text-zinc-500">Distribuição de pagamentos no período</p>
+            </div>
+            
+            <div class="flex p-1 bg-slate-100 dark:bg-zinc-900 rounded-xl">
+                 <button class="@(ChartPeriod == "daily" ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-zinc-300") px-4 py-1.5 rounded-lg text-xs font-bold transition-all" @onclick='() => SetPeriod("daily")'>Diário</button>
+                 <button class="@(ChartPeriod == "monthly" ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-zinc-300") px-4 py-1.5 rounded-lg text-xs font-bold transition-all" @onclick='() => SetPeriod("monthly")'>Mensal</button>
+            </div>
+        </div>
+        
+        <div class="h-[400px] w-full -ml-2 sm:ml-0">
+            <ApexChart TItem="ChartDataPoint"
+                        Title=""
+                        Options="options"
+                        @ref=chart
+                        Height="@("100%")">
+
+                <ApexPointSeries TItem="ChartDataPoint"
+                                Items="ExpenseData"
+                                Name="Pagamentos"
+                                SeriesType="SeriesType.Bar"
+                                XValue="e => e.X"
+                                YValue="e => e.Y" />
+            </ApexChart>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ChartDataPoint> ExpenseData { get; set; } = new();
+    private ApexChartOptions<ChartDataPoint> options { get; set; } = new();
+    private ApexChart<ChartDataPoint>? chart;
+    private string ChartPeriod = "monthly"; // Padrão Mensal
+
+    #region Lifecycle
+
+    protected override void OnInitialized()
+    {
+        ExpenseService.OnChange += HandleStateChange;
+        LoadChartData();
+    }
+    
+    public void Dispose()
+    {
+        ExpenseService.OnChange -= HandleStateChange;
+    }
+    
+    #endregion
+
+    #region Event Handlers
+
+    private void HandleStateChange()
+    {
+        LoadChartData();
+        chart?.UpdateSeriesAsync(true);
+        chart?.UpdateOptionsAsync(true, true, true);
+        StateHasChanged();
+    }
+    
+    private async Task SetPeriod(string period)
+    {
+        ChartPeriod = period;
+        LoadChartData();
+        await chart!.UpdateSeriesAsync(true);
+        StateHasChanged();
+    }
+
+    #endregion
+
+    #region Chart Logic
+
+    private void LoadChartData()
+    {
+        ExpenseData.Clear();
+        var today = DateTime.Today;
+
+        var allExpenses = new List<(DateTime Date, decimal Value, PaymentStatus Status)>();
+        
+        // 1. Coletar despesas (Parcelas + Manuais)
+        allExpenses.AddRange(ExpenseService.Invoices
+            .SelectMany(inv => inv.Installments)
+            .Select(i => (i.DueDate, i.Value, i.Status)));
+            
+        allExpenses.AddRange(ExpenseService.ManualExpenses
+            .Select(e => (e.DueDate, e.Value, e.Status)));
+
+        if (ChartPeriod == "daily")
+        {
+            // Próximos 30 dias
+            for (int i = 0; i < 30; i++)
+            {
+                var date = today.AddDays(i);
+                var totalInfo = allExpenses.Where(e => e.Date.Date == date && e.Status != PaymentStatus.PAID).ToList();
+                var val = totalInfo.Sum(x => x.Value);
+                
+                // Cor: Vermelho se atrasado, Indigo se futuro
+                var isOverdue = date < today && val > 0;
+                var color = isOverdue ? "#f43f5e" : "#6366f1"; 
+
+                if (val > 0 || i < 7) // Mostra sempre os primeiros 7 dias
+                {
+                     ExpenseData.Add(new ChartDataPoint { 
+                        X = date.ToString("dd/MMM").Replace(".", ""), 
+                        Y = val,
+                        FillColor = color 
+                    });
+                }
+            }
+        }
+        else // Monthly
+        {
+            // Próximos 6 meses + atual
+            var startMonth = new DateTime(today.Year, today.Month, 1);
+            for (int i = 0; i < 7; i++)
+            {
+                var currentMonth = startMonth.AddMonths(i);
+                var nextMonth = currentMonth.AddMonths(1);
+                
+                var totalVal = allExpenses
+                    .Where(e => e.Date >= currentMonth && e.Date < nextMonth && e.Status != PaymentStatus.PAID)
+                    .Sum(x => x.Value);
+
+                ExpenseData.Add(new ChartDataPoint { 
+                    X = currentMonth.ToString("MMM/yy").Replace(".", ""), // ex: Fev/26
+                    Y = totalVal,
+                    FillColor = "#6366f1"
+                });
+            }
+        }
+    }
+
+    private async Task InitChartOptions()
+    {
+        var isDark = await JSRuntime.InvokeAsync<bool>("eval", "document.documentElement.classList.contains('dark')");
+        
+        options = new ApexChartOptions<ChartDataPoint>
+        {
+            Chart = new Chart
+            {
+                Background = "transparent",
+                Toolbar = new Toolbar { Show = false },
+                FontFamily = "Inter, sans-serif",
+                Animations = new Animations { Enabled = true, Easing = Easing.Easeinout, Speed = 800 }
+            },
+            Theme = new Theme
+            {
+                Mode = isDark ? Mode.Dark : Mode.Light, 
+                Monochrome = new ThemeMonochrome { Enabled = false }
+            },
+            PlotOptions = new PlotOptions 
+            { 
+                Bar = new PlotOptionsBar 
+                { 
+                    BorderRadius = 6, 
+                    ColumnWidth = "40%",
+                    Distributed = true 
+                } 
+            },
+            Grid = new Grid 
+            { 
+                Show = true, 
+                BorderColor = isDark ? "#ffffff10" : "#00000010", 
+                StrokeDashArray = 3,
+                Yaxis = new GridYAxis { Lines = new Lines { Show = true } },
+                Xaxis = new GridXAxis { Lines = new Lines { Show = false } }
+            },
+            Xaxis = new XAxis 
+            { 
+                AxisBorder = new AxisBorder { Show = false },
+                AxisTicks = new AxisTicks { Show = false },
+                Labels = new XAxisLabels { 
+                    Style = new AxisLabelStyle { Colors = isDark ? "#71717a" : "#94a3b8", FontSize = "12px", FontWeight = "500" } 
+                }
+            },
+            Yaxis = new List<YAxis>
+            {
+                new YAxis 
+                { 
+                    Labels = new YAxisLabels 
+                    { 
+                        Style = new AxisLabelStyle { Colors = isDark ? "#52525b" : "#64748b", FontSize = "12px" }, 
+                        Formatter = @"function (value) { return value.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }"
+                    } 
+                }
+            },
+            Legend = new Legend { Show = false },
+            DataLabels = new DataLabels { Enabled = false },
+            Tooltip = new Tooltip 
+            { 
+                Theme = isDark ? Mode.Dark : Mode.Light,
+                Y = new TooltipY { Formatter = @"function(value) { return 'R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }); }" },
+                Marker = new TooltipMarker { Show = false },
+                CssClass = "glass-tooltip" 
+            }
+        };
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+             await InitChartOptions();
+             StateHasChanged();
+        }
+    }
+
+    #endregion
+
+    private string FormatCurrency(decimal value) => value.ToString("C", new System.Globalization.CultureInfo("pt-BR"));
+
+    // Classe ChartDataPoint foi removida pois agora usamos o Model global em Models/ChartDataPoint.cs
+}

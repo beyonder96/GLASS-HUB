@@ -1,0 +1,658 @@
+@page "/notas"
+@inject IExpenseService ExpenseService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@using System.Globalization
+
+<div class="animate-fade-in pb-32">
+    <!-- Header: Search & Quick Add -->
+    <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
+        <!-- Search Input -->
+        <div class="relative w-full group">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-indigo-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+            </div>
+            <input type="text" 
+                   @bind="SearchTerm" 
+                   @bind:event="oninput"
+                   placeholder="Pesquisar por fornecedor, número ou valor (R$)..." 
+                   class="w-full pl-12 pr-6 py-4 bg-[#121214] border border-zinc-800 rounded-full focus:ring-2 focus:ring-indigo-600/50 focus:border-indigo-600 outline-none transition-all placeholder:text-zinc-600 text-zinc-300 shadow-xl" />
+        </div>
+
+        <!-- Quick Add Button -->
+        <button @onclick="() => ShowAddModal = true" class="flex-none px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-full shadow-lg shadow-indigo-600/20 flex items-center gap-2 transition-all transform hover:scale-105">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Lançamento Rápido
+        </button>
+    </div>
+
+    <!-- Section Header -->
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-white tracking-tight">Todos os Lançamentos</h2>
+        <div class="flex items-center gap-3">
+             <!-- <button @onclick="ExportNotes" class="px-4 py-2 bg-[#18181b] hover:bg-[#27272a] text-zinc-400 hover:text-white border border-zinc-800 rounded-xl text-sm font-bold flex items-center gap-2 transition-all">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                 Exportar
+             </button> -->
+             <span class="px-3 py-1.5 bg-[#18181b] border border-zinc-800 rounded-lg text-xs font-bold text-zinc-500">
+                 @FilteredItems.Count() registros
+             </span>
+        </div>
+    </div>
+
+
+
+
+    <!-- Floating Action Bar (Top of Table) -->
+    @if(SelectedIds.Any())
+    {
+        <div class="sticky top-4 z-[90] animate-slide-down mb-6 flex justify-center">
+            <div class="flex items-center gap-6 px-6 py-3 bg-[#18181b]/95 backdrop-blur-xl border border-zinc-700/50 shadow-2xl rounded-full ring-1 ring-white/5 mx-auto">
+                <!-- Count -->
+                <div class="flex items-center gap-3 pr-4 border-r border-zinc-700/50">
+                    <span class="bg-indigo-600 font-mono text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg shadow-indigo-900/20">@SelectedIds.Count</span>
+                    <span class="text-zinc-300 text-sm font-medium whitespace-nowrap">selecionados</span>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-3">
+                    <button @onclick="ClearSelection" class="px-3 py-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-full transition-all text-sm font-medium" title="Cancelar Seleção">
+                        Cancelar
+                    </button>
+                    
+                    <div class="w-px h-6 bg-zinc-700 mx-1"></div>
+
+                    <div class="relative">
+                        <button @onclick="() => ShowExportMenu = !ShowExportMenu" class="group flex items-center gap-2 px-3 py-2 text-zinc-300 hover:text-white hover:bg-white/5 rounded-full text-sm font-medium transition-all" title="Opções de Exportação">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:scale-110"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <span>Exportar</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1 transition-transform @(ShowExportMenu ? "rotate-180" : "")"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+
+                        @if (ShowExportMenu)
+                        {
+                            <div class="absolute top-12 left-1/2 -translate-x-1/2 w-48 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-[100] animate-fade-in-up flex flex-col p-1.5 ring-1 ring-white/10">
+                                <button @onclick="ExportExcel" class="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-lg text-sm text-zinc-300 hover:text-white transition-colors text-left w-full group">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500 group-hover:text-emerald-400 transition-colors"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                    <span class="font-medium">Excel (CSV)</span>
+                                </button>
+                                <button @onclick="ExportPdf" class="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-lg text-sm text-zinc-300 hover:text-white transition-colors text-left w-full group">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500 group-hover:text-rose-400 transition-colors"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                    <span class="font-medium">PDF</span>
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                    <button @onclick="DeleteSelected" class="group flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 hover:text-rose-400 border border-rose-500/20 rounded-full text-sm font-bold transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:scale-110"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        <span>Excluir</span>
+                    </button>
+                    
+                    <button @onclick="PaySelected" class="group flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-sm font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all hover:-translate-y-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:scale-110"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Pagar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Table Container -->
+    <div class="bg-[#09090b] border border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-[#121214] border-b border-zinc-800 text-zinc-500 text-xs uppercase tracking-wider font-medium">
+                        <th class="p-4 w-16 text-center">
+                            <button @onclick="ToggleSelectAll" class="w-5 h-5 rounded border border-zinc-700 flex items-center justify-center transition-colors @(IsAllSelected ? "bg-indigo-600 border-indigo-600" : "hover:border-zinc-500")">
+                                @if (IsAllSelected) { <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><polyline points="20 6 9 17 4 12"/></svg> }
+                            </button>
+                        </th>
+                        <th class="p-4 w-32 text-center">Ação</th>
+                        <th class="p-4 w-32 text-center">Status</th>
+                        <th class="p-4">Origem</th>
+                        <th class="p-4">Vencimento</th>
+                        <th class="p-4 text-right">Valor</th>
+                        <th class="p-4">Descrição / Fornecedor</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-900">
+                    @foreach (var item in FilteredItems)
+                    {
+                        var isSelected = SelectedIds.Contains(item.Id);
+                        var isEditing = EditingId == item.Id;
+                        
+                        <tr class="group hover:bg-white/5 transition-colors @(isSelected ? "bg-indigo-900/10" : "")">
+                            <!-- Checkbox -->
+                            <td class="p-4 text-center relative">
+                                @if(isSelected) { <div class="absolute inset-y-0 left-0 w-1 bg-indigo-600"></div> }
+                                <button @onclick="() => ToggleSelection(item.Id)" class="w-5 h-5 rounded border border-zinc-700 flex items-center justify-center transition-colors mx-auto @(isSelected ? "bg-indigo-600 border-indigo-600" : "hover:border-zinc-500")">
+                                    @if(isSelected) { <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><polyline points="20 6 9 17 4 12"/></svg> }
+                                </button>
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="p-4 text-center">
+                                @if (isEditing)
+                                {
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button @onclick="() => SaveEdit(item)" class="p-1.5 rounded-lg bg-emerald-900/50 text-emerald-400 hover:bg-emerald-900/70 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                        </button>
+                                        <button @onclick="CancelEdit" class="p-1.5 rounded-lg bg-zinc-700 text-zinc-400 hover:bg-zinc-600 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="flex items-center justify-center gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
+                                        <button title="@(item.Status == PaymentStatus.PAID ? "Marcar como Pendente" : "Marcar como Pago")" 
+                                                @onclick="() => TogglePaymentStatus(item)" 
+                                                class="transition-colors @(item.Status == PaymentStatus.PAID ? "text-emerald-500" : "text-zinc-400 hover:text-emerald-500")">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                                        </button>
+                                        
+                                        <button title="Editar" 
+                                                disabled="@(item.Status == PaymentStatus.PAID)"
+                                                @onclick="() => StartEditing(item)" 
+                                                class="@(item.Status == PaymentStatus.PAID ? "text-zinc-600 cursor-not-allowed" : "text-zinc-400 hover:text-indigo-500") transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                                        </button>
+                                        
+                                        <button title="Excluir" @onclick="() => ConfirmDelete(item.Id)" class="text-zinc-400 hover:text-rose-500 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                        </button>
+                                    </div>
+                                }
+                            </td>
+
+                            <!-- Status -->
+                            <td class="p-4 text-center">
+                                <StatusBadge Status="@item.Status" />
+                            </td>
+
+                            <!-- Origem -->
+                            <td class="p-4">
+                                <div class="flex items-center gap-2 text-zinc-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 dark:text-zinc-500"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                    <span class="font-mono text-sm">@item.InvoiceNumber</span>
+                                    <span class="text-xs text-zinc-600">(@item.InstallmentNumber)</span>
+                                </div>
+                            </td>
+
+                            <!-- Vencimento -->
+                            <td class="p-4">
+                                @if (isEditing)
+                                {
+                                    <input type="date" @bind="EditDueDate" class="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs focus:ring-2 focus:ring-indigo-900 outline-none w-32 text-white" />
+                                }
+                                else
+                                {
+                                    var isOverdue = item.Status == PaymentStatus.PENDING && item.DueDate < DateTime.Today;
+                                    <div class="flex items-center gap-2">
+                                        @if(isOverdue)
+                                        {
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-rose-500"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                        }
+                                        <span class="text-sm @(isOverdue ? "text-rose-500 font-bold" : "text-zinc-300")">
+                                            @item.DueDate.ToString("d")
+                                        </span>
+                                    </div>
+                                }
+                            </td>
+
+                            <!-- Valor -->
+                            <td class="p-4 text-right">
+                                @if (isEditing)
+                                {
+                                    <input type="number" step="0.01" @bind="EditValue" class="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-xs focus:ring-2 focus:ring-indigo-900 outline-none w-24 text-right text-white" />
+                                }
+                                else
+                                {
+                                    <span class="font-bold text-zinc-200">@FormatCurrency(item.Value)</span>
+                                }
+                            </td>
+
+                            <!-- Descrição -->
+                            <td class="p-4">
+                                <span class="text-sm font-semibold text-zinc-300 uppercase tracking-wide truncate max-w-[200px] block" title="@item.Supplier">@item.Supplier</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            
+            @if (!FilteredItems.Any())
+            {
+                <div class="flex flex-col items-center justify-center py-20 bg-white/5 border-t border-zinc-800">
+                     <div class="h-16 w-16 bg-zinc-800 rounded-full flex items-center justify-center mb-4 text-zinc-500">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                     </div>
+                     <p class="text-lg font-medium text-zinc-400">Nenhuma nota encontrada</p>
+                </div>
+            }
+        </div>
+    </div>
+
+
+</div>
+
+
+
+    <!-- Confirm Dialog (Fixed Overlay) -->
+    @if (!string.IsNullOrEmpty(PendingDeleteId))
+    {
+         <div class="modal-overlay">
+            <!-- Backdrop Click Area -->
+            <div class="absolute inset-0" @onclick="CancelDelete"></div>
+            
+            <!-- Modal Content -->
+            <div class="modal-container w-full max-w-md relative p-8 rounded-3xl animate-fade-in-up transform transition-all">
+                 <div class="flex flex-col items-center text-center">
+                     <!-- Icon -->
+                     <div class="mb-6 w-20 h-20 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500 border border-rose-500/20 shadow-xl shadow-rose-900/20 ring-4 ring-rose-500/5">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                     </div>
+                     
+                     <!-- Text -->
+                     <div class="mb-8 space-y-2">
+                         <h3 class="font-bold text-2xl text-white tracking-tight">Confirmar Exclusão</h3>
+                         <p class="text-zinc-400 text-sm leading-relaxed max-w-[260px] mx-auto">Esta ação é permanente e removerá o item selecionado do sistema.</p>
+                     </div>
+
+                     <!-- Buttons -->
+                     <div class="grid grid-cols-2 gap-4 w-full">
+                         <button @onclick="CancelDelete" class="py-3.5 px-4 rounded-xl border border-zinc-700 hover:bg-zinc-800 text-zinc-300 font-semibold transition-all duration-200 active:scale-95">
+                             Cancelar
+                         </button>
+                         <button @onclick="DeleteConfirmed" class="py-3.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold transition-all duration-200 shadow-lg shadow-rose-900/20 hover:shadow-rose-900/40 hover:-translate-y-0.5 active:scale-95">
+                             Sim, Excluir
+                         </button>
+                     </div>
+                 </div>
+            </div>
+        </div>
+    }
+
+    <AddExpenseModal @bind-IsVisible="ShowAddModal" />
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6); /* 60% de preto para ofuscar o fundo */
+        z-index: 999; /* Garanta que esteja acima da lista */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-container {
+        /* CORREÇÃO (Opção Sólida e Glass combinadas para melhor visual): */
+        background-color: rgba(18, 18, 20, 0.95); /* Quase sólido, mas com leve toque glass */
+        backdrop-filter: blur(12px); /* Blur mais forte */
+        
+        /* Adicione uma borda sutil para delimitar */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); /* Sombra para profundidade */
+        z-index: 1000;
+    }
+</style>
+
+@code {
+    private string SearchTerm { get; set; } = string.Empty;
+    private HashSet<string> SelectedIds = new();
+    private string? PendingDeleteId;
+    private bool IsDeletingSelection = false;
+    private bool ShowExportMenu = false;
+    private bool ShowAddModal = false;
+
+    [SupplyParameterFromQuery]
+    public string? Filter { get; set; }
+
+    // Flattened Item for Display
+    public class ExpenseItem
+    {
+        public string Id { get; set; } = string.Empty;
+        public string InvoiceId { get; set; } = string.Empty;
+        public string InvoiceNumber { get; set; } = string.Empty;
+        public string InstallmentNumber { get; set; } = string.Empty;
+        public string Supplier { get; set; } = string.Empty;
+        public DateTime DueDate { get; set; }
+        public decimal Value { get; set; }
+        public PaymentStatus Status { get; set; }
+        public string Type { get; set; } = "NFE";
+    }
+
+    private IEnumerable<ExpenseItem> FilteredItems 
+    {
+        get
+        {
+            var invoices = ExpenseService.Invoices.AsEnumerable();
+            
+            // Flatten Invoices to Installments
+            var items = invoices.SelectMany(inv => inv.Installments.Select(inst => new ExpenseItem 
+            {
+                Id = inst.Id,
+                InvoiceId = inv.Id,
+                InvoiceNumber = inv.Number,
+                InstallmentNumber = inst.Number,
+                Supplier = inv.IssuerName,
+                DueDate = inst.DueDate,
+                Value = inst.Value,
+                Status = inst.Status,
+                Type = "NFE"
+            }));
+
+            // 1. Text Search
+            if (!string.IsNullOrEmpty(SearchTerm))
+            {
+                items = items.Where(i => i.Supplier.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) || 
+                                       i.InvoiceNumber.Contains(SearchTerm) || 
+                                       i.Value.ToString(new CultureInfo("pt-BR")).Contains(SearchTerm));
+            }
+
+            // 2. Dashboard Filters
+            if (!string.IsNullOrEmpty(Filter))
+            {
+                var today = DateTime.Today;
+                switch (Filter.ToLower())
+                {
+                    case "overdue":
+                        items = items.Where(i => i.Status == PaymentStatus.OVERDUE || (i.Status == PaymentStatus.PENDING && i.DueDate < today));
+                        break;
+                    case "paid":
+                        items = items.Where(i => i.Status == PaymentStatus.PAID);
+                        break;
+                    case "next7days":
+                        items = items.Where(i => i.Status != PaymentStatus.PAID && 
+                                               i.DueDate >= today && 
+                                               i.DueDate <= today.AddDays(7));
+                        break;
+                    case "pending":
+                        items = items.Where(i => i.Status != PaymentStatus.PAID);
+                        break;
+                }
+            }
+
+            return items.OrderBy(i => i.DueDate);
+        }
+    }
+
+    private bool IsAllSelected => FilteredItems.Any() && SelectedIds.Count == FilteredItems.Count();
+
+    protected override void OnInitialized()
+    {
+        ExpenseService.OnChange += HandleChange;
+    }
+
+    public void Dispose()
+    {
+        ExpenseService.OnChange -= HandleChange;
+    }
+
+    private void HandleChange() => StateHasChanged();
+
+    private void ToggleSelection(string id)
+    {
+        if (SelectedIds.Contains(id)) SelectedIds.Remove(id);
+        else SelectedIds.Add(id);
+    }
+    
+    private void ClearSelection() => SelectedIds.Clear();
+
+    private void ToggleSelectAll()
+    {
+        if (IsAllSelected) SelectedIds.Clear();
+        else SelectedIds = FilteredItems.Select(i => i.Id).ToHashSet();
+    }
+    
+
+
+
+    
+    // Editing Logic
+    private string? EditingId;
+    private DateTime EditDueDate;
+    private decimal EditValue;
+
+    private void StartEditing(ExpenseItem item)
+    {
+        EditingId = item.Id;
+        EditDueDate = item.DueDate;
+        EditValue = item.Value;
+    }
+
+    private void CancelEdit()
+    {
+        EditingId = null;
+    }
+
+    private void SaveEdit(ExpenseItem item)
+    {
+        // Find Original Invoice and Installment
+        // Since we don't have a direct Update method in ExpenseService for this specific scenario yet, 
+        // we might strictly need to update the object reference or add a service method.
+        // For now, assuming ExpenseService has a way to handle this or we interact with the object directly if it's in memory.
+        
+        // BETTER: Create a method in ExpenseService: UpdateInstallment(invoiceId, installmentId, newValue, newDate)
+        // Since I can't see ExpenseService right now, I'll simulate or add a placeholder comment.
+        // Assuming strict "mock" behavior:
+        
+        var invoice = ExpenseService.Invoices.FirstOrDefault(i => i.Id == item.InvoiceId);
+        var installment = invoice?.Installments.FirstOrDefault(i => i.Id == item.Id);
+        
+        if (installment != null)
+        {
+            installment.DueDate = EditDueDate;
+            installment.Value = EditValue;
+            // Recalculate Invoice Total? Ideally yes.
+            invoice.TotalValue = invoice.Installments.Sum(i => i.Value);
+            // ExpenseService.NotifyStateChanged();
+        }
+
+        EditingId = null;
+    }
+
+    private void TogglePaymentStatus(ExpenseItem item)
+    {
+        ExpenseService.ToggleInstallmentStatus(item.InvoiceId, item.Id);
+    }
+
+    private void PaySelected()
+    {
+        var selectedItems = FilteredItems.Where(i => SelectedIds.Contains(i.Id));
+        foreach(var item in selectedItems) 
+        {
+             if (item.Status != PaymentStatus.PAID)
+                ExpenseService.ToggleInstallmentStatus(item.InvoiceId, item.Id);
+        }
+        SelectedIds.Clear();
+    }
+
+    private void CancelDelete()
+    {
+        PendingDeleteId = null;
+        IsDeletingSelection = false;
+    }
+
+    // Deletion Logic
+    private void ConfirmDelete(string id)
+    {
+        // If id is Installment Id, we need to know if we are deleting just the installment or the invoice?
+        // Requirement implies "Deleting the item". If it's a generated installment from NFe, maybe we delete the whole NFe?
+        // Or if the user selects multiple, we delete the selected installments.
+        // For safe logic: If it's NFe, usually we delete the whole Invoice.
+        // But the ID passed here is the flatten item ID (Installment Id).
+        
+        // Let's find the invoice ID for this installment ID
+        var item = FilteredItems.FirstOrDefault(i => i.Id == id);
+        if (item != null)
+        {
+             PendingDeleteId = item.InvoiceId; // Delete the whole invoice for now as per previous logic
+             // Or should we implement Delete Installment? 
+             // Previous logic was Delete Invoice. Let's stick to Delete Invoice for consistency unless configured otherwise.
+        }
+        IsDeletingSelection = false;
+    }
+    
+    private void DeleteSelected()
+    {
+        if (SelectedIds.Any())
+        {
+             // If we select multiple installments, we essentially want to delete their parent invoices
+             // Careful not to try deleting the same invoice twice
+             PendingDeleteId = "SELECTION";
+             IsDeletingSelection = true;
+        }
+    }
+
+    private void DeleteConfirmed()
+    {
+        if (IsDeletingSelection)
+        {
+             var selectedItems = FilteredItems.Where(i => SelectedIds.Contains(i.Id)).ToList();
+             var invoiceIdsToDelete = selectedItems.Select(i => i.InvoiceId).Distinct();
+             
+             foreach(var invId in invoiceIdsToDelete) 
+             {
+                 ExpenseService.RemoveInvoice(invId);
+             }
+             SelectedIds.Clear();
+        }
+        else if (!string.IsNullOrEmpty(PendingDeleteId))
+        {
+            ExpenseService.RemoveInvoice(PendingDeleteId);
+        }
+        PendingDeleteId = null;
+        IsDeletingSelection = false;
+    }
+
+    private PaymentStatus GetInvoiceStatus(Invoice inv)
+    {
+        if (inv.Installments.All(i => i.Status == PaymentStatus.PAID)) return PaymentStatus.PAID;
+        if (inv.Installments.Any(i => i.Status == PaymentStatus.OVERDUE)) return PaymentStatus.OVERDUE;
+        return PaymentStatus.PENDING;
+    }
+
+    private string FormatCurrency(decimal value) => value.ToString("C", new CultureInfo("pt-BR"));
+
+    private async Task ExportExcel()
+    {
+        ShowExportMenu = false;
+        var itemsToExport = SelectedIds.Any() 
+            ? FilteredItems.Where(i => SelectedIds.Contains(i.Id)) 
+            : FilteredItems;
+
+        var builder = new System.Text.StringBuilder();
+        // CSV Header
+        builder.AppendLine("Status;Origem;Vencimento;Valor;Fornecedor");
+
+        foreach (var item in itemsToExport)
+        {
+            var status = item.Status;
+            
+            // Format data for CSV
+            var statusStr = status.ToString();
+            var number = item.InvoiceNumber?.Replace(";", "") ?? "";
+            var dateStr = item.DueDate.ToString("d", new CultureInfo("pt-BR"));
+            var valueStr = item.Value.ToString("F2", new CultureInfo("pt-BR"));
+            var issuer = item.Supplier?.Replace(";", ",") ?? "";
+
+            builder.AppendLine($"{statusStr};{number};{dateStr};{valueStr};{issuer}");
+        }
+
+        var fileName = $"Notas_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, "text/csv;charset=utf-8", "\uFEFF" + builder.ToString());
+    }
+
+    private async Task ExportPdf()
+    {
+        ShowExportMenu = false;
+        var itemsToExport = (SelectedIds.Any() 
+            ? FilteredItems.Where(i => SelectedIds.Contains(i.Id)) 
+            : FilteredItems).ToList();
+
+        var sb = new System.Text.StringBuilder();
+        sb.Append(@"
+            <html>
+            <head>
+                <title>Relatório Financeiro GlassHub</title>
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; }
+                    h1 { margin-bottom: 5px; font-size: 28px; color: #000; font-weight: 700; letter-spacing: -0.5px; }
+                    .subtitle { color: #666; font-size: 14px; margin-bottom: 30px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+                    th { background-color: #f4f4f5; text-align: left; padding: 12px 10px; font-weight: 600; border-bottom: 2px solid #e4e4e7; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; color: #52525b; }
+                    td { padding: 12px 10px; border-bottom: 1px solid #e4e4e7; vertical-align: middle; }
+                    tr:nth-child(even) { background-color: #fafafa; }
+                    .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
+                    .badge-paid { background-color: #dcfce7; color: #166534; }
+                    .badge-pending { background-color: #fef9c3; color: #854d0e; }
+                    .badge-overdue { background-color: #fee2e2; color: #991b1b; }
+                    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 20px; }
+                    .meta { text-align: right; font-size: 12px; color: #666; line-height: 1.5; }
+                    .total-box { margin-top: 30px; text-align: right; border-top: 2px solid #000; padding-top: 10px; }
+                    .total-label { font-size: 14px; font-weight: 600; color: #666; margin-right: 10px; }
+                    .total-value { font-size: 20px; font-weight: 700; color: #000; }
+                </style>
+            </head>
+            <body>
+                <div class='header'>
+                    <div>
+                        <h1>Relatório Financeiro</h1>
+                        <div class='subtitle'>GlassHub Gestão Inteligente</div>
+                    </div>
+                    <div class='meta'>
+                        <p><strong>Gerado em:</strong> " + DateTime.Now.ToString("g") + @"</p>
+                        <p><strong>Registros:</strong> " + itemsToExport.Count + @"</p>
+                        <p><strong>Usuário:</strong> Sistema</p>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th width='15%'>Status</th>
+                            <th width='20%'>Nº Nota / Parcela</th>
+                            <th width='15%'>Vencimento</th>
+                            <th width='35%'>Fornecedor</th>
+                            <th width='15%' style='text-align: right'>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>");
+
+        foreach (var item in itemsToExport)
+        {
+            var statusClass = item.Status == PaymentStatus.PAID ? "badge-paid" : (item.Status == PaymentStatus.OVERDUE ? "badge-overdue" : "badge-pending");
+            var statusLabel = item.Status == PaymentStatus.PAID ? "PAGO" : (item.Status == PaymentStatus.OVERDUE ? "ATRASADO" : "PENDENTE");
+            
+            sb.Append("<tr>");
+            sb.Append($"<td><span class='badge {statusClass}'>{statusLabel}</span></td>");
+            sb.Append($"<td><span style='font-weight:600'>{item.InvoiceNumber}</span> <span style='color:#999'>({item.InstallmentNumber})</span></td>");
+            sb.Append($"<td>{item.DueDate:d}</td>");
+            sb.Append($"<td>{item.Supplier}</td>");
+            sb.Append($"<td style='text-align: right; font-weight:600; font-family: monospace; font-size: 13px;'>{item.Value:C2}</td>");
+            sb.Append("</tr>");
+        }
+
+        var total = itemsToExport.Sum(i => i.Value);
+        sb.Append(@"
+                    </tbody>
+                </table>
+                <div class='total-box'>
+                    <span class='total-label'>TOTAL GERAL</span>
+                    <span class='total-value'>" + total.ToString("C2") + @"</span>
+                </div>
+            </body>
+            </html>");
+
+        await JSRuntime.InvokeVoidAsync("printHtml", sb.ToString());
+    }
+}

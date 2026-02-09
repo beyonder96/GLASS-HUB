@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GlassHub</title>
+    <base href="/" />
+    <link href="_framework/dotnet.d2dpy3qxtr.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-m8MfHPwMNGjgCjS4r5lDg9cHo4uueAYa1gkqqyJf9Xo=" />
+
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="GlassHub.styles.css" rel="stylesheet" />
+    <script type="importmap">{
+  "imports": {
+    "./_content/Blazor-ApexCharts/js/apexcharts.esm.js": "./_content/Blazor-ApexCharts/js/apexcharts.esm.h882x6wr7v.js",
+    "./_content/Blazor-ApexCharts/js/blazor-apexcharts.js": "./_content/Blazor-ApexCharts/js/blazor-apexcharts.zql1jd3hot.js",
+    "./_content/Microsoft.DotNet.HotReload.WebAssembly.Browser/Microsoft.DotNet.HotReload.WebAssembly.Browser.lib.module.js": "./_content/Microsoft.DotNet.HotReload.WebAssembly.Browser/Microsoft.DotNet.HotReload.WebAssembly.Browser.99zm1jdh75.lib.module.js",
+    "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.66stpp682q.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.d2dpy3qxtr.js",
+    "./_framework/dotnet.native.js": "./_framework/dotnet.native.87vtjjdetb.js",
+    "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.2tx45g8lli.js",
+    "./lib/bootstrap/dist/js/bootstrap.bundle.js": "./lib/bootstrap/dist/js/bootstrap.bundle.3h59mu4dlc.js",
+    "./lib/bootstrap/dist/js/bootstrap.bundle.min.js": "./lib/bootstrap/dist/js/bootstrap.bundle.min.493y06b0oq.js",
+    "./lib/bootstrap/dist/js/bootstrap.esm.min.js": "./lib/bootstrap/dist/js/bootstrap.esm.min.jj8uyg4cgr.js",
+    "./lib/bootstrap/dist/js/bootstrap.esm.js": "./lib/bootstrap/dist/js/bootstrap.esm.xhwigg63u2.js",
+    "./lib/bootstrap/dist/js/bootstrap.min.js": "./lib/bootstrap/dist/js/bootstrap.min.63fj8s7r0e.js",
+    "./lib/bootstrap/dist/js/bootstrap.js": "./lib/bootstrap/dist/js/bootstrap.szdxnjb8im.js"
+  },
+  "scopes": {},
+  "integrity": {
+    "./_content/Blazor-ApexCharts/js/apexcharts.esm.h882x6wr7v.js": "sha256-Me/0pVM/DeNNyCbOqiYTyK/B2Xdev4YSA0cw3FI0I0g=",
+    "./_content/Blazor-ApexCharts/js/apexcharts.esm.js": "sha256-Me/0pVM/DeNNyCbOqiYTyK/B2Xdev4YSA0cw3FI0I0g=",
+    "./_content/Blazor-ApexCharts/js/blazor-apexcharts.js": "sha256-pSTiNp0EHiK1R8oo+Fxk/lg9ZZRfmqmR/z89YjJ2SXU=",
+    "./_content/Blazor-ApexCharts/js/blazor-apexcharts.zql1jd3hot.js": "sha256-pSTiNp0EHiK1R8oo+Fxk/lg9ZZRfmqmR/z89YjJ2SXU=",
+    "./_content/Microsoft.DotNet.HotReload.WebAssembly.Browser/Microsoft.DotNet.HotReload.WebAssembly.Browser.99zm1jdh75.lib.module.js": "sha256-A8e6zZwhOqf7lDQqbbCYcAUv4wGE9aQxOo4WyYxR//0=",
+    "./_content/Microsoft.DotNet.HotReload.WebAssembly.Browser/Microsoft.DotNet.HotReload.WebAssembly.Browser.lib.module.js": "sha256-A8e6zZwhOqf7lDQqbbCYcAUv4wGE9aQxOo4WyYxR//0=",
+    "./_framework/blazor.webassembly.66stpp682q.js": "sha256-3lCWrko3zwspV40aQhs2S/IMkRSarnHRKIdkHhuXIBA=",
+    "./_framework/blazor.webassembly.js": "sha256-3lCWrko3zwspV40aQhs2S/IMkRSarnHRKIdkHhuXIBA=",
+    "./_framework/dotnet.d2dpy3qxtr.js": "sha256-m8MfHPwMNGjgCjS4r5lDg9cHo4uueAYa1gkqqyJf9Xo=",
+    "./_framework/dotnet.js": "sha256-m8MfHPwMNGjgCjS4r5lDg9cHo4uueAYa1gkqqyJf9Xo=",
+    "./_framework/dotnet.native.87vtjjdetb.js": "sha256-zE11fbcG2CeLl1Zi+NJgMOfWpdjuUWNte+icrtAO58I=",
+    "./_framework/dotnet.native.js": "sha256-zE11fbcG2CeLl1Zi+NJgMOfWpdjuUWNte+icrtAO58I=",
+    "./_framework/dotnet.runtime.2tx45g8lli.js": "sha256-2lZh9yO0fnzm3Xt7yV+Kox3DH3nK7L8hDhm84VT1xco=",
+    "./_framework/dotnet.runtime.js": "sha256-2lZh9yO0fnzm3Xt7yV+Kox3DH3nK7L8hDhm84VT1xco=",
+    "./lib/bootstrap/dist/js/bootstrap.bundle.3h59mu4dlc.js": "sha256-Ce7bStQzPtG1VSX+pVcHfFIINWbfDkDKGS5zEEg5a8E=",
+    "./lib/bootstrap/dist/js/bootstrap.bundle.js": "sha256-Ce7bStQzPtG1VSX+pVcHfFIINWbfDkDKGS5zEEg5a8E=",
+    "./lib/bootstrap/dist/js/bootstrap.bundle.min.493y06b0oq.js": "sha256-CDOy6cOibCWEdsRiZuaHf8dSGGJRYuBGC+mjoJimHGw=",
+    "./lib/bootstrap/dist/js/bootstrap.bundle.min.js": "sha256-CDOy6cOibCWEdsRiZuaHf8dSGGJRYuBGC+mjoJimHGw=",
+    "./lib/bootstrap/dist/js/bootstrap.esm.js": "sha256-+xqjHsXLw2z0uATiK2EiTG9I68jLvj6TPkXmfQnFViU=",
+    "./lib/bootstrap/dist/js/bootstrap.esm.min.jj8uyg4cgr.js": "sha256-QZdFT1ZNdly4rmgUBtXmXFS9BU1FTa+sPe6h794sFRQ=",
+    "./lib/bootstrap/dist/js/bootstrap.esm.min.js": "sha256-QZdFT1ZNdly4rmgUBtXmXFS9BU1FTa+sPe6h794sFRQ=",
+    "./lib/bootstrap/dist/js/bootstrap.esm.xhwigg63u2.js": "sha256-+xqjHsXLw2z0uATiK2EiTG9I68jLvj6TPkXmfQnFViU=",
+    "./lib/bootstrap/dist/js/bootstrap.js": "sha256-6Od+RNhVZHe5C0zIztztNPmfdT29cHAM44wTDflNzBs=",
+    "./lib/bootstrap/dist/js/bootstrap.min.63fj8s7r0e.js": "sha256-3gQJhtmj7YnV1fmtbVcnAV6eI4ws0Tr48bVZCThtCGQ=",
+    "./lib/bootstrap/dist/js/bootstrap.min.js": "sha256-3gQJhtmj7YnV1fmtbVcnAV6eI4ws0Tr48bVZCThtCGQ=",
+    "./lib/bootstrap/dist/js/bootstrap.szdxnjb8im.js": "sha256-6Od+RNhVZHe5C0zIztztNPmfdT29cHAM44wTDflNzBs="
+  }
+}</script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="glass-splash">
+            <div class="glass-spinner"></div>
+            <div class="glass-text">Carregando GlassHub</div>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui">
+        Ocorreu um erro inesperado.
+        <a href="." class="reload">Recarregar</a>
+        <span class="dismiss">✕</span>
+    </div>
+
+    <style>
+        /* Splash Screen Styles */
+        .glass-splash {
+            position: fixed;
+            inset: 0;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .glass-splash {
+                background-color: #09090b;
+            }
+        }
+
+        .dark .glass-splash {
+            background-color: #09090b;
+        }
+
+        .glass-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            /* Indigo-500/20 */
+            border-top-color: #6366f1;
+            /* Indigo-500 */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .glass-text {
+            margin-top: 16px;
+            color: #52525b;
+            /* Zinc-600 */
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .5;
+            }
+        }
+
+        /* Error UI Styles - Forced Override */
+        #blazor-error-ui {
+            background: rgba(24, 24, 27, 0.9) !important;
+            /* zinc-950 */
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            color: #e4e4e7 !important;
+            /* zinc-200 */
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5) !important;
+            border-radius: 12px !important;
+            bottom: 24px !important;
+            right: 24px !important;
+            left: auto !important;
+            width: auto !important;
+            padding: 12px 20px !important;
+            display: none;
+            /* Blazor will flip this to block, we want that */
+            z-index: 999999 !important;
+            font-family: ui-sans-serif, system-ui, sans-serif !important;
+            font-size: 14px !important;
+            position: fixed !important;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #blazor-error-ui .dismiss {
+            cursor: pointer;
+            padding-left: 12px;
+            color: #71717a;
+        }
+
+        #blazor-error-ui .dismiss:hover {
+            color: #fff;
+        }
+
+        #blazor-error-ui .reload {
+            color: #818cf8 !important;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        #blazor-error-ui .reload:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+    <script>
+        window.setTheme = (isDark) => {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+        };
+
+        // Initialize theme immediately to prevent flash
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+
+        window.downloadFile = (filename, contentType, content) => {
+            const blob = new Blob([content], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        window.printHtml = (htmlContent) => {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 250);
+        };
+    </script>
+
+    <script src="_framework/blazor.webassembly.js"></script>
+</body>
+
+</html>

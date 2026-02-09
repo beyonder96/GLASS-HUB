@@ -1,0 +1,324 @@
+@page "/fluxo"
+@inject IExpenseService ExpenseService
+@inject SettingsService SettingsService
+@implements IDisposable
+@using System.Globalization
+
+<div class="animate-fade-in max-w-4xl mx-auto space-y-8 pb-32">
+    <!-- Header -->
+    <div class="flex flex-col gap-1 px-4 lg:px-0">
+        <h1 class="text-3xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+            Fluxo Diário 
+            <span class="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></span>
+        </h1>
+        <p class="text-sm text-slate-400 dark:text-zinc-500">Próximos vencimentos consolidados</p>
+    </div>
+
+    <!-- Timeline Container -->
+    <div class="relative px-4 lg:px-0 pl-8">
+        
+        <!-- Vertical Line -->
+        <div class="absolute left-4 top-2 bottom-0 w-px bg-slate-200 dark:bg-zinc-800"></div>
+
+        @if (!GroupedItems.Any())
+        {
+            <div class="flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl ml-6">
+                <p class="text-slate-400 dark:text-zinc-600 font-medium">Nenhum lançamento encontrado.</p>
+            </div>
+        }
+
+        @foreach (var group in GroupedItems)
+        {
+            var isExpanded = ExpandedDates.Contains(group.Date);
+            var isToday = group.Date.Date == DateTime.Today;
+            
+            <div class="relative mb-6 group/timeline-item">
+                 
+                 <!-- Timeline Dot (Holographic Node) -->
+                 <div class="absolute left-[-21px] top-8 w-3 h-3 rounded-full border-2 border-[#000000] z-10 box-content transition-all duration-300
+                            @(isExpanded ? "bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.6)] scale-125 ring-2 ring-indigo-500/20" : "bg-zinc-800 group-hover/timeline-item:bg-zinc-600 group-hover/timeline-item:shadow-[0_0_10px_rgba(255,255,255,0.1)]")"></div>
+
+                <!-- Main Card Container -->
+                 <div class="ml-6 transition-all duration-300">
+                    <div class="overflow-hidden rounded-[24px] border transition-all duration-500 ease-out
+                                @(isExpanded ? "bg-white dark:bg-[#09090b] border-indigo-500/30 shadow-2xl shadow-indigo-500/10 dark:shadow-indigo-900/10" : "bg-white dark:bg-black border-slate-200 dark:border-white/10 hover:border-indigo-200 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-[#050505]")">
+                    
+                        <!-- Header (Always Visible) -->
+                        <div @onclick="() => ToggleGroup(group.Date)" 
+                             class="flex items-center justify-between p-5 cursor-pointer select-none relative z-20">
+                            
+                            <div class="flex items-center gap-5">
+                                <!-- Date Badge -->
+                                <div class="flex flex-col items-center justify-center w-12 h-14 rounded-xl transition-all duration-300 border border-transparent
+                                            @(isExpanded ? "bg-slate-100 dark:bg-zinc-900 text-slate-800 dark:text-white border-slate-200 dark:border-white/5 shadow-inner" : "bg-slate-50 dark:bg-zinc-900/40 text-slate-400 dark:text-zinc-500 group-hover/timeline-item:text-indigo-600 dark:group-hover/timeline-item:text-zinc-300")">
+                                    <span class="text-xl font-bold leading-none mb-0.5">@group.Date.Day</span>
+                                    <span class="text-[10px] font-black uppercase leading-none tracking-wider">@group.Date.ToString("MMM").Replace(".", "").ToUpper()</span>
+                                </div>
+
+                                <!-- Info -->
+                                <div>
+                                     <h3 class="text-lg font-bold capitalize leading-tight transition-colors duration-300 @(isExpanded ? "text-slate-900 dark:text-white" : "text-slate-700 dark:text-zinc-300 group-hover:text-indigo-600 dark:group-hover:text-white")">
+                                         @group.Date.ToString("dddd", new CultureInfo("pt-BR"))
+                                     </h3>
+                                     <p class="text-sm text-slate-400 dark:text-zinc-500 font-medium mt-0.5 transition-colors duration-300 @(isExpanded ? "text-indigo-600 dark:text-indigo-400" : "")">@group.Items.Count() pagamentos</p>
+                                </div>
+                            </div>
+
+                            <!-- Right Actions -->
+                            <div class="flex items-center gap-6">
+                                <span class="text-lg font-bold tracking-tight transition-colors duration-300 @(isExpanded ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-zinc-400 group-hover:text-indigo-600 dark:group-hover:text-zinc-200")">
+                                    @FormatCurrency(group.Total)
+                                </span>
+                                
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 @(isExpanded ? "rotate-180 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" : "text-slate-400 dark:text-zinc-600 group-hover:text-indigo-600 dark:group-hover:text-white")">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Content (Smooth Grid Transition) -->
+                        <div class="grid transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] @(isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")">
+                            <div class="overflow-hidden">
+                                <div class="px-5 pb-5 pt-0 space-y-3">
+                                    
+                                    <!-- Dashed Connector inside open card -->
+                                    <div class="w-px h-4 bg-slate-200 dark:bg-zinc-800 absolute left-[43px] top-[76px] -z-10 opacity-50"></div>
+
+                                    @foreach (var item in group.Items)
+                                    {
+                                        <div class="relative flex items-center justify-between p-4 bg-slate-50/50 dark:bg-black/40 border border-slate-100 dark:border-white/5 rounded-2xl group/item hover:border-indigo-200 dark:hover:border-white/15 hover:bg-white dark:hover:bg-white/5 transition-all duration-300 shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-none">
+                                            <div class="flex items-center gap-4">
+                                                <!-- Icon -->
+                                                <div class="w-10 h-10 rounded-xl bg-white dark:bg-zinc-900 flex items-center justify-center text-slate-400 dark:text-zinc-500 border border-slate-100 dark:border-white/5 transition-colors group-hover/item:text-indigo-600 dark:group-hover/item:text-indigo-400 group-hover/item:border-indigo-100 dark:group-hover/item:border-indigo-500/20 shadow-sm dark:shadow-none">
+                                                    @if(item.IsBuffer)
+                                                    {
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                                    }
+                                                    else
+                                                    {
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <rect width="20" height="14" x="2" y="5" rx="2" />
+                                                            <line x1="2" x2="22" y1="10" y2="10" />
+                                                        </svg>
+                                                    }
+                                                </div>
+
+                                                <!-- Details -->
+                                                <div>
+                                                    <h4 class="text-sm font-bold text-slate-700 dark:text-zinc-200 transition-colors group-hover/item:text-slate-900 dark:group-hover/item:text-white @(item.Status == PaymentStatus.PAID ? "line-through opacity-50" : "")">
+                                                        @item.Description
+                                                    </h4>
+                                                    
+                                                    <div class="flex items-center gap-2 mt-1.5">
+                                                        @if(item.IsBuffer)
+                                                        {
+                                                            <span class="px-1.5 py-[2px] rounded text-[9px] uppercase font-bold tracking-wide bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                                                                Reserva
+                                                            </span>
+                                                        }
+                                                        else 
+                                                        {
+                                                            <!-- Type Badge -->
+                                                            <span class="px-1.5 py-[2px] rounded text-[9px] uppercase font-bold tracking-wide bg-slate-100 dark:bg-zinc-900 text-slate-500 dark:text-zinc-500 border border-slate-200 dark:border-white/5">
+                                                                @(item.IsManual ? "Manual" : "XML")
+                                                            </span>
+
+                                                            <!-- Smart Origin Badge (Orange for moved dates) -->
+                                                            @if (GetOriginalDate(item.DueDate) != item.DueDate)
+                                                            {
+                                                                <span class="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-500 font-bold bg-amber-50 dark:bg-amber-500/10 px-1.5 py-[2px] rounded border border-amber-200 dark:border-amber-500/20 shadow-sm dark:shadow-[0_0_10px_rgba(245,158,11,0.1)]">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+                                                                     Origem: @GetOriginalDate(item.DueDate).ToString("dd/MM")
+                                                                </span>
+                                                            }
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Right: Value -->
+                                            <div class="flex items-center gap-4">
+                                                <span class="font-bold text-slate-900 dark:text-white tracking-wide @(item.Status == PaymentStatus.PAID ? "text-emerald-600 dark:text-emerald-500" : "")">
+                                                    @FormatCurrency(item.Value)
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- Add New Button -->
+                                    <button @onclick="() => OpenAddModal(group.Date)" class="w-full py-4 border border-dashed border-slate-300 dark:border-zinc-800 rounded-2xl flex items-center justify-center gap-2 text-slate-400 dark:text-zinc-600 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300 dark:hover:border-indigo-500/30 transition-all group/btn mt-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover/btn:scale-110 transition-transform"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        <span class="text-xs font-bold uppercase tracking-wider">Novo Lançamento</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        }
+    </div>
+    
+    <GlassHub.Components.AddExpenseModal @bind-IsVisible="IsAddModalVisible" InitialDate="SelectedAddDate" />
+</div>
+
+@code {
+    private List<DailyGroup> GroupedItems = new();
+    private HashSet<DateTime> ExpandedDates = new();
+    private bool IsAddModalVisible = false;
+    private DateTime? SelectedAddDate;
+
+    #region Lifecycle
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SettingsService.InitializeAsync();
+        SettingsService.OnChange += HandleChange;
+        ExpenseService.OnChange += HandleChange;
+        LoadData();
+    }
+
+    public void Dispose()
+    {
+        SettingsService.OnChange -= HandleChange;
+        ExpenseService.OnChange -= HandleChange;
+    }
+
+    #endregion
+
+    #region Event Handlers
+
+    private void HandleChange()
+    {
+        LoadData();
+        StateHasChanged();
+    }
+
+    private void ToggleGroup(DateTime date)
+    {
+        if (ExpandedDates.Contains(date))
+            ExpandedDates.Remove(date);
+        else
+            ExpandedDates.Add(date);
+    }
+
+    private void OpenAddModal(DateTime date)
+    {
+        SelectedAddDate = date;
+        IsAddModalVisible = true;
+    }
+
+    #endregion
+
+    #region Data Logic
+
+    // Helper to simulate "Weekend Logic"
+    private DateTime GetOriginalDate(DateTime current)
+    {
+        if (current.DayOfWeek == DayOfWeek.Monday) return current.AddDays(-1); 
+        return current;
+    }
+
+    private void LoadData()
+    {
+        var installments = ExpenseService.Invoices
+            .SelectMany(inv => inv.Installments.Select(inst => new FlowItem 
+            {
+                Id = inst.Id,
+                ParentId = inv.Id,
+                Description = inv.IssuerName,
+                SubDescription = $"Parc. {inst.Number}",
+                Value = inst.Value,
+                DueDate = inst.DueDate,
+                Status = inst.Status,
+                IsManual = false
+            }));
+
+        var manuals = ExpenseService.ManualExpenses
+            .Select(exp => new FlowItem 
+            {
+                Id = exp.Id,
+                Description = exp.Description,
+                SubDescription = exp.Category ?? "",
+                Value = exp.Value,
+                DueDate = exp.DueDate,
+                Status = exp.Status,
+                IsManual = true
+            });
+
+        var allItems = installments.Concat(manuals)
+            .OrderBy(i => i.DueDate)
+            .ToList();
+
+        // Ensure we expand today by default if in list
+        var today = DateTime.Today;
+        if (!ExpandedDates.Any() && allItems.Any(i => i.DueDate.Date == today))
+        {
+            ExpandedDates.Add(today);
+        }
+
+        var groups = allItems
+            .GroupBy(i => i.DueDate.Date)
+            .Select(g => new DailyGroup 
+            {
+                Date = g.Key,
+                Items = g.ToList(),
+                Total = g.Sum(x => x.Value)
+            })
+            .ToList();
+
+        // Add Buffer to groups
+        if (SettingsService.DailyBuffer > 0)
+        {
+            foreach (var group in groups)
+            {
+                group.Items.Add(new FlowItem
+                {
+                    Id = "BUFFER",
+                    Description = "Buffer Diário",
+                    SubDescription = "Reserva Operacional",
+                    Value = SettingsService.DailyBuffer,
+                    DueDate = group.Date,
+                    Status = PaymentStatus.PENDING,
+                    IsManual = true,
+                    IsBuffer = true
+                });
+                group.Total += SettingsService.DailyBuffer;
+            }
+        }
+
+        GroupedItems = groups;
+    }
+
+    #endregion
+
+    #region Formatters
+
+    private string FormatCurrency(decimal value) => value.ToString("C", new CultureInfo("pt-BR"));
+
+    #endregion
+
+    #region View Models
+
+    public class DailyGroup
+    {
+        public DateTime Date { get; set; }
+        public List<FlowItem> Items { get; set; } = new();
+        public decimal Total { get; set; }
+    }
+
+    public class FlowItem
+    {
+        public string Id { get; set; } = "";
+        public string? ParentId { get; set; }
+        public string Description { get; set; } = "";
+        public string SubDescription { get; set; } = "";
+        public decimal Value { get; set; }
+        public DateTime DueDate { get; set; }
+        public PaymentStatus Status { get; set; }
+        public bool IsManual { get; set; }
+        public bool IsBuffer { get; set; }
+    }
+
+    #endregion
+}

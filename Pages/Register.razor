@@ -1,0 +1,98 @@
+@page "/register"
+@layout Layout.AuthLayout
+@inject NavigationManager Navigation
+
+<div class="backdrop-blur-xl bg-white/70 dark:bg-[#0a0a0a]/80 border border-white/50 dark:border-zinc-900 shadow-2xl rounded-[32px] p-8 md:p-10 relative overflow-hidden">
+    
+    <!-- Decorative highlight -->
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-50"></div>
+
+    @if (!isRegistered)
+    {
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-400">Criar Conta</h1>
+            <p class="text-slate-500 dark:text-zinc-400 mt-2">Junte-se ao GLASS HUB hoje</p>
+        </div>
+
+        <form class="space-y-5" @onsubmit="HandleRegistration">
+            <div class="space-y-2">
+                <label for="name" class="text-sm font-medium ml-1 text-slate-700 dark:text-zinc-300">Nome Completo</label>
+                <div class="relative group">
+                    <input type="text" id="name" 
+                        class="w-full px-5 py-3.5 bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-900 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-600 group-hover:border-slate-300 dark:group-hover:border-zinc-800" 
+                        placeholder="Seu Nome" required />
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label for="email" class="text-sm font-medium ml-1 text-slate-700 dark:text-zinc-300">Email</label>
+                <div class="relative group">
+                    <input type="email" id="email" 
+                        class="w-full px-5 py-3.5 bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-900 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-600 group-hover:border-slate-300 dark:group-hover:border-zinc-800" 
+                        placeholder="seu@email.com" required />
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label for="password" class="text-sm font-medium ml-1 text-slate-700 dark:text-zinc-300">Senha</label>
+                <div class="relative group">
+                    <input type="password" id="password" 
+                        class="w-full px-5 py-3.5 bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-900 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-600 group-hover:border-slate-300 dark:group-hover:border-zinc-800" 
+                        placeholder="••••••••" required />
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" 
+                    class="w-full py-3.5 px-6 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-zinc-900 font-bold text-sm shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 relative overflow-hidden group">
+                    <span class="relative z-10 flex items-center justify-center gap-2">
+                        Cadastrar
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" x2="20" y1="8" y2="14"/><line x1="23" x2="17" y1="11" y2="11"/></svg>
+                    </span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-emerald-600 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-8 text-center">
+            <p class="text-sm text-slate-500 dark:text-zinc-400">
+                Já tem uma conta? 
+                <a href="/login" class="font-semibold text-slate-800 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Fazer login</a>
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-6 animate-fade-in">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.5C2 7 4 5 6.5 5H18c2.2 0 4 1.8 4 4v8Z"/><polyline points="15,9 18,9 18,11"/><path d="M6.5 5C9 5 9 9 9 9M9 5v4"/></svg>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">Verifique seu Email</h2>
+            
+            <p class="text-slate-500 dark:text-zinc-400 mb-8 max-w-sm mx-auto">
+                Enviamos um link de confirmação para o seu email. Por favor, verifique sua caixa de entrada para ativar sua conta.
+            </p>
+
+            <button @onclick="NavigateToLogin" 
+                class="w-full py-3.5 px-6 rounded-xl border-2 border-slate-200 dark:border-zinc-700 hover:border-emerald-500 dark:hover:border-emerald-500 text-slate-700 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 font-bold text-sm transition-all duration-300">
+                Voltar para Login
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isRegistered = false;
+
+    private void HandleRegistration()
+    {
+        // Simulate registration success
+        isRegistered = true;
+    }
+
+    private void NavigateToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+}

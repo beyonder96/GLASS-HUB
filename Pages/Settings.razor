@@ -1,0 +1,168 @@
+@page "/settings"
+@using GlassHub.Services
+@inject IJSRuntime JSRuntime
+@inject SettingsService SettingsService
+
+<div class="animate-fade-in max-w-2xl mx-auto space-y-8 pb-20">
+    <div class="flex items-center gap-4 mb-4">
+        <a href="/" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Configurações</h1>
+    </div>
+
+    <!-- Tab Nav -->
+    <div class="p-1 bg-slate-100 dark:bg-zinc-900 rounded-xl inline-flex">
+        <button @onclick="@(() => ActiveTab = "PROFILE")" class="@(ActiveTab == "PROFILE" ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-zinc-500") px-6 py-2 rounded-lg text-sm font-bold transition-all">Perfil</button>
+        <button @onclick="@(() => ActiveTab = "FINANCE")" class="@(ActiveTab == "FINANCE" ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-zinc-500") px-6 py-2 rounded-lg text-sm font-bold transition-all">Financeiro</button>
+    </div>
+
+    <div class="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 rounded-3xl p-8 shadow-xl">
+        
+        @if (ActiveTab == "PROFILE")
+        {
+            <div class="space-y-8 animate-fade-in">
+                <!-- Avatar -->
+                <div class="flex flex-col items-center">
+                    <div class="relative group cursor-pointer w-24 h-24 rounded-full bg-slate-100 dark:bg-zinc-900 border-4 border-white dark:border-zinc-800 overflow-hidden shadow-lg flex items-center justify-center">
+                        @if (!string.IsNullOrEmpty(UserAvatar))
+                        {
+                            <img src="@UserAvatar" class="w-full h-full object-cover" />
+                        }
+                        else
+                        {
+                            <span class="text-3xl font-bold text-slate-300 dark:text-zinc-700">@((UserName.Length >= 2) ? UserName.Substring(0, 2).ToUpper() : "JS")</span>
+                        }
+                        
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                             <InputFile OnChange="HandleFileSelected" accept=".jpg,.png,.jpeg" class="absolute inset-0 opacity-0 cursor-pointer" />
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">Clique na foto para alterar</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nome de Exibição</label>
+                        <input type="text" @bind="UserName" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white transition-all" />
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (ActiveTab == "FINANCE")
+        {
+             <div class="space-y-8 animate-fade-in">
+                 <!-- Buffer -->
+                 <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">Buffer Diário</label>
+                         <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400">@Buffer.ToString("C")</span>
+                    </div>
+                    <div class="p-4 bg-slate-50 dark:bg-zinc-900 rounded-xl border border-slate-100 dark:border-zinc-800">
+                         <input type="range" min="0" max="10000" step="100" @bind="Buffer" @bind:event="oninput" class="w-full h-2 bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                         <p class="text-[10px] text-slate-400 mt-2">Valor de segurança adicionado às previsões.</p>
+                    </div>
+                 </div>
+
+                 <!-- Strategy -->
+                 <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-zinc-800">
+                      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Estratégia de Feriados</label>
+                      <div class="space-y-3">
+                           <div @onclick="@(() => Strategy = "POSTPONE")" class="cursor-pointer p-4 rounded-xl border-2 transition-all flex items-center gap-4 @(Strategy == "POSTPONE" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" : "border-slate-100 dark:border-zinc-800")">
+                                <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center @(Strategy == "POSTPONE" ? "border-indigo-600" : "border-slate-300")">
+                                     @if(Strategy == "POSTPONE") { <div class="w-2.5 h-2.5 bg-indigo-600 rounded-full" /> }
+                                </div>
+                                <div>
+                                     <p class="font-bold text-sm text-slate-800 dark:text-white">Postergar</p>
+                                     <p class="text-xs text-slate-500">Pagar no próximo dia útil</p>
+                                </div>
+                           </div>
+
+                           <div @onclick="@(() => Strategy = "ADVANCE")" class="cursor-pointer p-4 rounded-xl border-2 transition-all flex items-center gap-4 @(Strategy == "ADVANCE" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" : "border-slate-100 dark:border-zinc-800")">
+                                <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center @(Strategy == "ADVANCE" ? "border-indigo-600" : "border-slate-300")">
+                                     @if(Strategy == "ADVANCE") { <div class="w-2.5 h-2.5 bg-indigo-600 rounded-full" /> }
+                                </div>
+                                <div>
+                                     <p class="font-bold text-sm text-slate-800 dark:text-white">Antecipar</p>
+                                     <p class="text-xs text-slate-500">Pagar no dia anterior</p>
+                                </div>
+                           </div>
+                      </div>
+                 </div>
+             </div>
+        }
+
+    </div>
+    
+    <div class="flex justify-end">
+        <button @onclick="SaveSettings" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 transition-all active:scale-95">
+            Salvar Alterações
+        </button>
+    </div>
+    
+    <!-- Success Toast -->
+    @if(ShowSuccessMessage)
+    {
+        <div class="fixed bottom-8 right-8 bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-fade-in-up z-50">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div>
+                <h4 class="font-bold text-sm">Sucesso!</h4>
+                <p class="text-xs text-white/90">Configurações salvas.</p>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string ActiveTab = "PROFILE";
+    private decimal Buffer = 1000;
+    private string Strategy = "POSTPONE";
+    
+    // Profile Data
+    private string UserName = "João Silva";
+    private string? UserAvatar;
+    
+    // UI State
+    private bool ShowSuccessMessage = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load from service (which should be initialized in MainLayout)
+        // If not initialized, we can call it here too, but let's assume MainLayout did it or check properties
+        if (string.IsNullOrEmpty(SettingsService.UserName))
+        {
+            await SettingsService.InitializeAsync();
+        }
+
+        UserName = SettingsService.UserName;
+        UserAvatar = SettingsService.UserAvatar;
+        Buffer = SettingsService.DailyBuffer;
+        Strategy = SettingsService.HolidayStrategy;
+    }
+
+    private async Task SaveSettings()
+    {
+        await SettingsService.SaveSettingsAsync(UserName, UserAvatar, Buffer, Strategy);
+        
+        // Show Toast
+        ShowSuccessMessage = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        ShowSuccessMessage = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var resizedFile = await file.RequestImageFileAsync(file.ContentType, 300, 300);
+            var buffer = new byte[resizedFile.Size];
+            await resizedFile.OpenReadStream().ReadAsync(buffer);
+            UserAvatar = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+        }
+    }
+}
