@@ -22,17 +22,26 @@ public class ExpenseService : IExpenseService
     /// </summary>
     public void AddInvoice(Invoice invoice)
     {
+        // Duplicate Prevention
+        if (Invoices.Any(i => (!string.IsNullOrEmpty(i.AccessKey) && i.AccessKey == invoice.AccessKey) || 
+                             (i.Number == invoice.Number && i.IssuerName == invoice.IssuerName)))
+        {
+            return;
+        }
+
         Invoices.Add(invoice);
         NotifyStateChanged();
     }
 
     /// <summary>
-    /// Adiciona múltiplas faturas de uma vez.
+    /// Adiciona múltiplas faturas de uma vez, filtrando duplicadas.
     /// </summary>
     public void AddInvoices(IEnumerable<Invoice> invoices)
     {
-        Invoices.AddRange(invoices);
-        NotifyStateChanged();
+        foreach (var inv in invoices)
+        {
+            AddInvoice(inv);
+        }
     }
 
     /// <summary>

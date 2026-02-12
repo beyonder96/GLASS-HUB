@@ -1,0 +1,457 @@
+@page "/fiscal/analise"
+@using GlassHub.Services
+@using GlassHub.Services.Fiscal
+@using GlassHub.Models
+@inject IJSRuntime JSRuntime
+
+<div class="min-h-screen bg-slate-50 dark:bg-[#0F172A] text-slate-600 dark:text-slate-300 font-sans selection:bg-indigo-500/30 pb-20 transition-colors duration-500">
+    <!-- Header -->
+    <header class="bg-white/80 dark:bg-slate-900/50 backdrop-blur-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" class="text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">Fiscal<span class="text-indigo-600 dark:text-indigo-400">Hub</span></h1>
+                    <div class="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Validador Inteligente 2.0</div>
+                </div>
+            </div>
+            
+             <div class="flex items-center gap-4">
+                 @if (CurrentAnalysis?.OriginalInvoice != null)
+                 {
+                    <div class="px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700 text-xs font-mono text-slate-400 flex items-center gap-2">
+                         <span class="animate-pulse w-2 h-2 rounded-full bg-indigo-500"></span>
+                         @CurrentAnalysis.OriginalInvoice.FileName
+                    </div>
+                 }
+             </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <!-- File Upload Area (only if no analysis) -->
+        @if (CurrentAnalysis == null)
+        {
+            <div class="animate-fade-in-up">
+                <div class="relative group cursor-pointer">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2rem] blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative bg-white dark:bg-zinc-900 rounded-[2rem] p-12 text-center border border-slate-100 dark:border-zinc-800 shadow-2xl shadow-indigo-500/10 transition-all duration-300 group-hover:-translate-y-1">
+                        <InputFile OnChange="HandleFileSelect" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept=".xml" />
+                        
+                        <div class="w-24 h-24 bg-indigo-50 dark:bg-indigo-500/10 rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-transform duration-500 ring-1 ring-indigo-500/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        </div>
+                        
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">Arraste seu XML aqui</h3>
+                        <p class="text-slate-500 dark:text-zinc-400 text-lg max-w-md mx-auto leading-relaxed">
+                            Analise notas fiscais com <span class="text-indigo-600 dark:text-indigo-400 font-bold">inteligência fiscal</span> e validação avançada em tempo real.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Analysis Dashboard -->
+            <div class="space-y-8">
+            
+                <!-- Header Actions -->
+                <div class="flex items-center justify-between animate-fade-in">
+                    <button @onclick="ResetAnalysis" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors text-sm font-bold shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        Nova Análise
+                    </button>
+                    
+                    <div class="flex items-center gap-4">
+                         <!-- Purpose Switcher -->
+                        <div class="flex items-center gap-1 bg-white dark:bg-zinc-900 p-1.5 rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm">
+                             <button class="px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all @(CurrentInvoice.Purpose == InvoicePurpose.REVENDA ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/30" : "text-slate-500 hover:bg-slate-50 dark:hover:bg-zinc-800")" 
+                                     @onclick="() => ChangePurpose(InvoicePurpose.REVENDA)">
+                                 Revenda
+                             </button>
+                             <button class="px-4 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all @(CurrentInvoice.Purpose == InvoicePurpose.CONSUMO ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/30" : "text-slate-500 hover:bg-slate-50 dark:hover:bg-zinc-800")"
+                                     @onclick="() => ChangePurpose(InvoicePurpose.CONSUMO)">
+                                 Consumo
+                             </button>
+                        </div>
+                        
+                        <!-- DANFE Button (New) -->
+                        <button @onclick="GenerateDanfe" class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-400 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-emerald-500/30 transition-all hover:-translate-y-0.5 active:scale-95 group/btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover/btn:animate-bounce"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                            Espelho Correto
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Validation Status Banner (Simplified & Combined) -->
+                <div class="animate-fade-in-up">
+                    @{
+                        var allLogicalErrors = itemErrors.Concat(CurrentAnalysis.ValidationErrors).Distinct().ToList();
+                        bool hasIssues = !validationResult.IsValid || CurrentAnalysis.Discrepancies.Any() || allLogicalErrors.Any();
+                    }
+
+                    @if (hasIssues)
+                    {
+                        <div class="flex flex-col gap-4">
+                            @if (integrityErrors.Any() || calculationErrors.Any() || CurrentAnalysis.Discrepancies.Any())
+                            {
+                                <div class="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex items-start gap-4 shadow-sm">
+                                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-500 shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-rose-400 font-bold text-sm mb-1 uppercase tracking-tight">Erros e Divergências Críticas</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1">
+                                            @foreach (var error in integrityErrors.Concat(calculationErrors).Concat(CurrentAnalysis.Discrepancies))
+                                            {
+                                                <div class="text-[10px] text-rose-400/80 flex items-start gap-2 font-mono">
+                                                    <span class="mt-1 w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>
+                                                    @error
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (allLogicalErrors.Any())
+                            {
+                                <div class="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4 flex items-start gap-4 shadow-sm">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-indigo-400 font-bold text-sm mb-1 uppercase tracking-tight">Regras de Operação e Alertas (@(CurrentInvoice.Purpose == InvoicePurpose.REVENDA ? "Revenda" : "Consumo"))</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                                            @foreach (var error in allLogicalErrors)
+                                            {
+                                                <div class="text-[10px] text-slate-400 flex items-start gap-2">
+                                                    <span class="mt-1 w-1 h-1 rounded-full bg-indigo-500 shrink-0"></span>
+                                                    @error
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-emerald-400 font-bold text-sm">Operação Validada</h3>
+                                    <p class="text-emerald-500/60 text-[10px] uppercase font-bold tracking-widest">Conformidade SEFAZ 100%</p>
+                                </div>
+                            </div>
+                            <div class="text-[10px] text-emerald-500/40 font-mono hidden md:block">
+                                Verificado via Motor de Inteligência Fiscal GlassHub
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Invoice Details -->
+                <div class="space-y-6 animate-fade-in-up">
+                    
+                <!-- Balanced Fiscal Header -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-fade-in-up">
+                    
+                    <!-- Left: Entities & Summary (8 columns) -->
+                    <div class="lg:col-span-8 bg-white dark:bg-slate-900/40 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-white/5 p-6 flex flex-col justify-between gap-8 shadow-xl">
+                        
+                        <!-- Top: Emit / Dest -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 relative items-center">
+                            <!-- Emitente -->
+                            <div class="flex items-center gap-5 min-w-0 p-4 rounded-2xl bg-white dark:bg-white/[0.02] border border-slate-100 dark:border-white/[0.05] hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all group/card shadow-sm hover:shadow-md">
+                                <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-black text-[12px] shrink-0 shadow-sm border border-indigo-100 dark:border-indigo-500/20 group-hover/card:scale-110 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7"/><path d="M9 7v1a3 3 0 0 0 6 0V7"/><path d="M15 7v1a3 3 0 0 0 6 0V7"/><path d="M19 21v-4a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v4"/><path d="M21 12.12V12l-1.05-3.15A2 2 0 0 0 18.06 7.5H5.94a2 2 0 0 0-1.89 1.35L3 12v.12"/></svg>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-widest mb-1 opacity-70">Emitente</div>
+                                    <div class="font-black text-slate-900 dark:text-white leading-tight truncate text-lg" title="@CurrentInvoice.IssuerName">@CurrentInvoice.IssuerName</div>
+                                    <div class="text-xs text-slate-500 font-mono mt-1.5 flex items-center gap-2">
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] border border-slate-200 dark:border-slate-700">CNPJ</span> @CurrentInvoice.IssuerCnpj
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Destinatário -->
+                            <div class="flex items-center gap-5 min-w-0 p-4 rounded-2xl bg-white dark:bg-white/[0.02] border border-slate-100 dark:border-white/[0.05] hover:border-emerald-200 dark:hover:border-emerald-500/30 transition-all group/card shadow-sm hover:shadow-md">
+                                <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-black text-[12px] shrink-0 shadow-sm border border-emerald-200 dark:border-emerald-500/20 group-hover/card:scale-110 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-widest mb-1 opacity-70">Destinatário</div>
+                                    <div class="font-black text-slate-900 dark:text-white leading-tight truncate text-lg" title="@CurrentInvoice.RecipientName">@CurrentInvoice.RecipientName</div>
+                                    <div class="text-xs text-slate-500 font-mono mt-1.5 flex items-center gap-2">
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] border border-slate-200 dark:border-slate-700">CNPJ</span> @CurrentInvoice.RecipientTaxId
+                                        <span class="w-1 h-1 rounded-full bg-slate-700"></span>
+                                        <span class="text-emerald-600 dark:text-emerald-500/70">@CurrentInvoice.RecipientState</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom: Invoice Summary Strip (Balanced Grid) -->
+                        <div class="pt-6 border-t border-slate-100 dark:border-white/5 grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div class="flex flex-col gap-1.5">
+                                <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Número da Nota</span>
+                                <span class="text-sm font-mono font-black text-indigo-600 dark:text-indigo-400">@CurrentInvoice.Number</span>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Série</span>
+                                <span class="text-sm font-mono font-black text-indigo-600 dark:text-indigo-400">@(string.IsNullOrEmpty(CurrentInvoice.Serie) ? "001" : CurrentInvoice.Serie)</span>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Data Emissão</span>
+                                <span class="text-sm font-mono font-black text-indigo-600 dark:text-indigo-400">@CurrentInvoice.IssueDate.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <div class="flex flex-col gap-1.5 col-span-2">
+                                <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Natureza da Operação</span>
+                                <div class="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold border border-indigo-100 dark:border-indigo-500/20 truncate" title="@CurrentInvoice.NatureOfOperation">
+                                    @CurrentInvoice.NatureOfOperation
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Compact Totals Card (4 columns) -->
+                    <div class="lg:col-span-4 bg-indigo-600 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/20 flex flex-col justify-center relative overflow-hidden">
+                        <div class="relative z-10 space-y-6">
+                            <div>
+                                <div class="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1 opacity-80">Total da Nota Fiscal</div>
+                                <div class="text-4xl font-black tracking-tighter leading-none">
+                                    @RenderDiffMoney(CurrentInvoice.TotalValue, CurrentAnalysis.CalculatedInvoice.TotalValue, "text-white")
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-x-6 gap-y-4 pt-6 border-t border-white/20">
+                                <div>
+                                    <div class="text-indigo-100/50 text-[8px] font-black uppercase tracking-widest mb-1 text-white/60">Base ICMS</div>
+                                    <div class="text-sm font-bold text-white">@RenderDiffMoney(CurrentInvoice.IcmsBase, CurrentAnalysis.CalculatedInvoice.IcmsBase, "text-white")</div>
+                                </div>
+                                <div>
+                                    <div class="text-indigo-100/50 text-[8px] font-black uppercase tracking-widest mb-1 text-white/60">Valor ICMS</div>
+                                    <div class="text-sm font-bold text-white">@RenderDiffMoney(CurrentInvoice.IcmsValue, CurrentAnalysis.CalculatedInvoice.IcmsValue, "text-white")</div>
+                                </div>
+                                <div>
+                                    <div class="text-indigo-100/50 text-[8px] font-black uppercase tracking-widest mb-1 text-white/60">Valor IPI</div>
+                                    <div class="text-sm font-bold text-white">@RenderDiffMoney(CurrentInvoice.IpiValue, CurrentAnalysis.CalculatedInvoice.IpiValue, "text-white")</div>
+                                </div>
+                                <div>
+                                    <div class="text-indigo-100/50 text-[8px] font-black uppercase tracking-widest mb-1 text-white/60">Valor ST</div>
+                                    <div class="text-sm font-bold text-white">@RenderDiffMoney(CurrentInvoice.IcmsStValue, CurrentAnalysis.CalculatedInvoice.IcmsStValue, "text-white")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                    <!-- Items Table -->
+                    <div class="bg-white dark:bg-slate-900/40 backdrop-blur-md rounded-3xl shadow-xl border border-slate-200 dark:border-white/5 overflow-hidden">
+                        <div class="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.02]">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white">Itens da Nota</h3>
+                                <p class="text-[11px] text-slate-500 uppercase font-black tracking-widest mt-1">Conferência Individual de Produtos</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="flex items-center gap-2 text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span> Original
+                                </div>
+                                <div class="flex items-center gap-2 text-[9px] font-black text-rose-500 uppercase tracking-widest">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Incorreto
+                                </div>
+                                <div class="flex items-center gap-2 text-[9px] font-black text-emerald-500 uppercase tracking-widest">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Correto
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm border-separate border-spacing-0">
+                                <thead class="bg-white/[0.03] text-slate-500 font-bold uppercase text-[8px] tracking-thinner text-center border-b border-white/5">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left w-48">Produto / SKU</th>
+                                        <th class="px-2 py-3">NCM/SH</th>
+                                        <th class="px-2 py-3">O/CST</th>
+                                        <th class="px-2 py-3">CFOP</th>
+                                        <th class="px-2 py-3">UNID</th>
+                                        <th class="px-2 py-3 text-right">QTD</th>
+                                        <th class="px-3 py-3 text-right">VALOR UNIT.</th>
+                                        <th class="px-3 py-3 text-right">VALOR TOTAL</th>
+                                        <th class="px-3 py-3 text-right">BC ICMS</th>
+                                        <th class="px-3 py-3 text-right">VALOR ICMS</th>
+                                        <th class="px-3 py-3 text-right">VALOR IPI</th>
+                                        <th class="px-2 py-3">ALIQ. ICMS</th>
+                                        <th class="px-2 py-3">ALIQ. IPI</th>
+                                        <th class="px-3 py-3 text-right text-rose-400/70">BC ICMS ST</th>
+                                        <th class="px-3 py-3 text-right text-rose-400">VALOR ST</th>
+                                        <th class="px-3 py-3 text-right">FRETE</th>
+                                        <th class="px-4 py-3 text-right bg-indigo-500/10 text-indigo-400 border-l border-white/5">CUSTO EFETIVO</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-white/5">
+                                    @for (int i = 0; i < CurrentInvoice.Items.Count; i++)
+                                    {
+                                        var item = CurrentInvoice.Items[i];
+                                        var calcItem = CurrentAnalysis.CalculatedInvoice.Items[i];
+                                        
+                                        <tr class="hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group text-[10px]">
+                                            <td class="px-4 py-2 text-left">
+                                                <div class="font-bold text-slate-700 dark:text-slate-200 truncate max-w-[180px]" title="@item.Name">@item.Name</div>
+                                                <div class="text-[8px] text-slate-500 font-mono">@item.Code</div>
+                                            </td>
+                                            <td class="px-2 py-2 text-center font-mono text-slate-500 dark:text-slate-400">@item.Ncm</td>
+                                            <td class="px-2 py-2 text-center">
+                                                <span class="px-1 py-0.5 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-[9px] font-black text-indigo-600 dark:text-indigo-400/80">
+                                                    @((string.IsNullOrEmpty(item.Cst) ? item.Csosn : item.Cst))
+                                                </span>
+                                            </td>
+                                            <td class="px-2 py-2 text-center font-mono text-slate-500">@item.Cfop</td>
+                                            <td class="px-2 py-2 text-center text-slate-500">@item.Unit</td>
+                                            <td class="px-2 py-2 text-right font-mono text-slate-600 dark:text-slate-400">@item.Quantity.ToString("N3")</td>
+                                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-400">R$ @item.UnitPrice.ToString("N4")</td>
+                                            <td class="px-3 py-2 text-right font-bold text-slate-900 dark:text-white">
+                                                @RenderDiffMoney(item.TotalValue, calcItem.TotalValue)
+                                            </td>
+                                            
+                                            <!-- ICMS Section -->
+                                            <td class="px-3 py-2 text-right font-mono text-slate-500">@item.IcmsBase.ToString("N2")</td>
+                                            <td class="px-3 py-2 text-right font-bold text-indigo-300">@item.IcmsValue.ToString("N2")</td>
+                                            
+                                            <!-- IPI Section -->
+                                            <td class="px-3 py-2 text-right font-bold text-purple-300">@item.IpiValue.ToString("N2")</td>
+                                            
+                                            <!-- Rates -->
+                                            <td class="px-2 py-2 text-center text-indigo-400/60 font-black">@item.IcmsRate.ToString("N2")%</td>
+                                            <td class="px-2 py-2 text-center text-purple-400/60 font-black">@item.IpiRate.ToString("N2")%</td>
+
+                                            <!-- ST Section -->
+                                            <td class="px-3 py-2 text-right font-mono text-rose-500/40">@item.IcmsStBase.ToString("N2")</td>
+                                            <td class="px-3 py-2 text-right font-bold text-rose-400">@item.IcmsStValue.ToString("N2")</td>
+
+                                            <!-- Frete -->
+                                            <td class="px-3 py-2 text-right text-slate-500">
+                                                @if(item.FreightValue > 0) { <span>@item.FreightValue.ToString("N2")</span> } else { <span class="opacity-20">-</span> }
+                                            </td>
+
+                                            <!-- Effective Cost (The Main Metric) -->
+                                            <td class="px-4 py-2 text-right bg-indigo-500/5 font-black text-indigo-400 text-[11px] border-l border-white/5">
+                                                R$ @item.EffectiveUnitCost.ToString("N3")
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private FiscalAnalysis? CurrentAnalysis;
+    private Invoice? CurrentInvoice => CurrentAnalysis?.OriginalInvoice;
+    private ParseResult validationResult = new ParseResult();
+    
+    // Quick helpers
+    private IEnumerable<string> integrityErrors => validationResult.ValidationErrors.Where(e => e.Contains("Assinatura") || e.Contains("Chave") || e.Contains("Protocolo"));
+    private IEnumerable<string> calculationErrors => validationResult.ValidationErrors.Where(e => e.Contains("Total") || e.Contains("soma") || e.Contains("Valor"));
+    private IEnumerable<string> itemErrors => validationResult.ValidationErrors.Where(e => !e.Contains("Assinatura") && !e.Contains("Chave") && !e.Contains("Protocolo") && !e.Contains("Total") && !e.Contains("soma") && !e.Contains("Valor"));
+
+    private async Task HandleFileSelect(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            try
+            {
+                using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+                // 1. Initial Parse
+                var result = await XmlParser.ParseAsync(stream, file.Name, InvoicePurpose.REVENDA);
+                
+                if (result.Invoice != null)
+                {
+                    // 2. Perform Deep Analysis
+                    CurrentAnalysis = FiscalValidationService.Analyze(result.Invoice);
+                    validationResult = result;
+                    
+                    // Add inconsistencies found to validation result if you want them to appear in status banner
+                    // Or keep separate as we did in UI
+                }
+                else
+                {
+                   // Handle error
+                   validationResult = result;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
+
+    private void ChangePurpose(InvoicePurpose purpose)
+    {
+        if (CurrentAnalysis?.OriginalInvoice != null)
+        {
+            CurrentAnalysis.OriginalInvoice.Purpose = purpose;
+            CurrentAnalysis = FiscalValidationService.Analyze(CurrentAnalysis.OriginalInvoice);
+        }
+    }
+
+    private void ResetAnalysis()
+    {
+        CurrentAnalysis = null;
+        validationResult = new ParseResult();
+    }
+    
+    // ... logic above ...
+    
+    private void GenerateDanfe()
+    {
+        if (CurrentAnalysis?.CalculatedInvoice == null) return;
+        ShowDanfe = true;
+    }
+    
+    // Visual Diff Helper
+    private RenderFragment RenderDiffMoney(decimal original, decimal calculated, string defaultColor = "") => builder =>
+    {
+        // ... (Helper logic) ...
+         if (Math.Abs(original - calculated) > 0.05m)
+        {
+             // Render strikethrough original
+            builder.OpenElement(0, "span");
+            builder.AddAttribute(1, "class", "line-through text-rose-500/70 mr-2 opacity-70 scale-90 inline-block font-mono");
+            builder.AddContent(2, original.ToString("N2"));
+            builder.CloseElement();
+
+            // Render corrected
+            builder.OpenElement(3, "span");
+            builder.AddAttribute(4, "class", "text-emerald-500 font-bold");
+            builder.AddContent(5, calculated.ToString("N2"));
+            builder.CloseElement();
+        }
+        else
+        {
+             builder.OpenElement(6, "span");
+             if (!string.IsNullOrEmpty(defaultColor)) builder.AddAttribute(7, "class", defaultColor);
+             builder.AddContent(8, original.ToString("N2"));
+             builder.CloseElement();
+        }
+    };
+
+    private bool ShowDanfe = false;
+}
+
+<GlassHub.Components.Fiscal.DanfeView @bind-IsVisible="ShowDanfe" Invoice="@CurrentAnalysis?.CalculatedInvoice" />

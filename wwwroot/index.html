@@ -9,7 +9,7 @@
     <link rel="preload" id="webassembly" />
 
     <link rel="stylesheet" href="css/app.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="logo.svg" />
     <link href="GlassHub.styles.css" rel="stylesheet" />
     <script type="importmap"></script>
 </head>
@@ -17,6 +17,8 @@
 <body>
     <div id="app">
         <div class="glass-splash">
+            <img src="logo.svg" alt="GlassHub"
+                style="width: 80px; height: 80px; margin-bottom: 24px; animation: float 3s ease-in-out infinite" />
             <div class="glass-spinner"></div>
             <div class="glass-text">Carregando GlassHub</div>
         </div>
@@ -89,6 +91,18 @@
 
             50% {
                 opacity: .5;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
             }
         }
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GlassHub")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bb81b9c636d06550963db1da8871cc86a0b3283c")]
 [assembly: System.Reflection.AssemblyProductAttribute("GlassHub")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GlassHub")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -864,6 +864,27 @@
             "related": ".xml"
           }
         }
+      },
+      "Zeus.Net.NFe.NFCe/2026.2.5.1303": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/DFe.Classes.dll": {},
+          "lib/net6.0/DFe.Utils.dll": {},
+          "lib/net6.0/DFe.Wsdl.dll": {},
+          "lib/net6.0/NFe.Classes.dll": {},
+          "lib/net6.0/NFe.Servicos.dll": {},
+          "lib/net6.0/NFe.Utils.dll": {},
+          "lib/net6.0/NFe.Wsdl.Standard.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/DFe.Classes.dll": {},
+          "lib/net6.0/DFe.Utils.dll": {},
+          "lib/net6.0/DFe.Wsdl.dll": {},
+          "lib/net6.0/NFe.Classes.dll": {},
+          "lib/net6.0/NFe.Servicos.dll": {},
+          "lib/net6.0/NFe.Utils.dll": {},
+          "lib/net6.0/NFe.Wsdl.Standard.dll": {}
+        }
       }
     },
     "net10.0/browser-wasm": {
@@ -1728,6 +1749,27 @@
           "lib/net8.0/Websocket.Client.dll": {
             "related": ".xml"
           }
+        }
+      },
+      "Zeus.Net.NFe.NFCe/2026.2.5.1303": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/DFe.Classes.dll": {},
+          "lib/net6.0/DFe.Utils.dll": {},
+          "lib/net6.0/DFe.Wsdl.dll": {},
+          "lib/net6.0/NFe.Classes.dll": {},
+          "lib/net6.0/NFe.Servicos.dll": {},
+          "lib/net6.0/NFe.Utils.dll": {},
+          "lib/net6.0/NFe.Wsdl.Standard.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/DFe.Classes.dll": {},
+          "lib/net6.0/DFe.Utils.dll": {},
+          "lib/net6.0/DFe.Wsdl.dll": {},
+          "lib/net6.0/NFe.Classes.dll": {},
+          "lib/net6.0/NFe.Servicos.dll": {},
+          "lib/net6.0/NFe.Utils.dll": {},
+          "lib/net6.0/NFe.Wsdl.Standard.dll": {}
         }
       }
     }
@@ -3206,6 +3248,39 @@
         "websocket.client.5.1.1.nupkg.sha512",
         "websocket.client.nuspec"
       ]
+    },
+    "Zeus.Net.NFe.NFCe/2026.2.5.1303": {
+      "sha512": "5g2aH3rVplxk+nP9YghaeO7SJDKOIlNjqSj3SaYS2rcL06coiOLhDSe3RnYYU3CKUhr9oAFsR3g2orzLkYz0Sw==",
+      "type": "package",
+      "path": "zeus.net.nfe.nfce/2026.2.5.1303",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/net462/DFe.Classes.dll",
+        "lib/net462/DFe.Utils.dll",
+        "lib/net462/DFe.Wsdl.dll",
+        "lib/net462/NFe.Classes.dll",
+        "lib/net462/NFe.Servicos.dll",
+        "lib/net462/NFe.Utils.dll",
+        "lib/net462/NFe.Wsdl.dll",
+        "lib/net6.0/DFe.Classes.dll",
+        "lib/net6.0/DFe.Utils.dll",
+        "lib/net6.0/DFe.Wsdl.dll",
+        "lib/net6.0/NFe.Classes.dll",
+        "lib/net6.0/NFe.Servicos.dll",
+        "lib/net6.0/NFe.Utils.dll",
+        "lib/net6.0/NFe.Wsdl.Standard.dll",
+        "lib/netstandard2.0/DFe.Classes.dll",
+        "lib/netstandard2.0/DFe.Utils.dll",
+        "lib/netstandard2.0/DFe.Wsdl.dll",
+        "lib/netstandard2.0/NFe.Classes.dll",
+        "lib/netstandard2.0/NFe.Servicos.dll",
+        "lib/netstandard2.0/NFe.Utils.dll",
+        "lib/netstandard2.0/NFe.Wsdl.Standard.dll",
+        "zeus.net.nfe.nfce.2026.2.5.1303.nupkg.sha512",
+        "zeus.net.nfe.nfce.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
@@ -3217,7 +3292,8 @@
       "Microsoft.DotNet.HotReload.WebAssembly.Browser >= 10.0.102",
       "Microsoft.NET.ILLink.Tasks >= 10.0.2",
       "Microsoft.NET.Sdk.WebAssembly.Pack >= 10.0.2",
-      "Supabase >= 1.1.1"
+      "Supabase >= 1.1.1",
+      "Zeus.Net.NFe.NFCe >= 2026.2.5.1303"
     ]
   },
   "packageFolders": {
@@ -3302,6 +3378,10 @@
           "Supabase": {
             "target": "Package",
             "version": "[1.1.1, )"
+          },
+          "Zeus.Net.NFe.NFCe": {
+            "target": "Package",
+            "version": "[2026.2.5.1303, )"
           }
         },
         "imports": [

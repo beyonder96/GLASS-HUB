@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GlassHub</title>
     <base href="/" />
-    <link href="_framework/dotnet.d2dpy3qxtr.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-m8MfHPwMNGjgCjS4r5lDg9cHo4uueAYa1gkqqyJf9Xo=" />
+    <link href="_framework/dotnet.9tq5aoiiq3.js" rel="preload" as="script" fetchpriority="high" crossorigin="anonymous" integrity="sha256-/WBJJA1PCtB7KJosnAUk+QCvvOGdeKQMQmJ1Nqxp/Xs=" />
 
     <link rel="stylesheet" href="css/app.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="logo.svg" />
     <link href="GlassHub.styles.css" rel="stylesheet" />
     <script type="importmap">{
   "imports": {
@@ -17,7 +17,7 @@
     "./_content/Blazor-ApexCharts/js/blazor-apexcharts.js": "./_content/Blazor-ApexCharts/js/blazor-apexcharts.zql1jd3hot.js",
     "./_content/Microsoft.DotNet.HotReload.WebAssembly.Browser/Microsoft.DotNet.HotReload.WebAssembly.Browser.lib.module.js": "./_content/Microsoft.DotNet.HotReload.WebAssembly.Browser/Microsoft.DotNet.HotReload.WebAssembly.Browser.99zm1jdh75.lib.module.js",
     "./_framework/blazor.webassembly.js": "./_framework/blazor.webassembly.66stpp682q.js",
-    "./_framework/dotnet.js": "./_framework/dotnet.d2dpy3qxtr.js",
+    "./_framework/dotnet.js": "./_framework/dotnet.9tq5aoiiq3.js",
     "./_framework/dotnet.native.js": "./_framework/dotnet.native.87vtjjdetb.js",
     "./_framework/dotnet.runtime.js": "./_framework/dotnet.runtime.2tx45g8lli.js",
     "./lib/bootstrap/dist/js/bootstrap.bundle.js": "./lib/bootstrap/dist/js/bootstrap.bundle.3h59mu4dlc.js",
@@ -37,8 +37,8 @@
     "./_content/Microsoft.DotNet.HotReload.WebAssembly.Browser/Microsoft.DotNet.HotReload.WebAssembly.Browser.lib.module.js": "sha256-A8e6zZwhOqf7lDQqbbCYcAUv4wGE9aQxOo4WyYxR//0=",
     "./_framework/blazor.webassembly.66stpp682q.js": "sha256-3lCWrko3zwspV40aQhs2S/IMkRSarnHRKIdkHhuXIBA=",
     "./_framework/blazor.webassembly.js": "sha256-3lCWrko3zwspV40aQhs2S/IMkRSarnHRKIdkHhuXIBA=",
-    "./_framework/dotnet.d2dpy3qxtr.js": "sha256-m8MfHPwMNGjgCjS4r5lDg9cHo4uueAYa1gkqqyJf9Xo=",
-    "./_framework/dotnet.js": "sha256-m8MfHPwMNGjgCjS4r5lDg9cHo4uueAYa1gkqqyJf9Xo=",
+    "./_framework/dotnet.9tq5aoiiq3.js": "sha256-/WBJJA1PCtB7KJosnAUk+QCvvOGdeKQMQmJ1Nqxp/Xs=",
+    "./_framework/dotnet.js": "sha256-/WBJJA1PCtB7KJosnAUk+QCvvOGdeKQMQmJ1Nqxp/Xs=",
     "./_framework/dotnet.native.87vtjjdetb.js": "sha256-zE11fbcG2CeLl1Zi+NJgMOfWpdjuUWNte+icrtAO58I=",
     "./_framework/dotnet.native.js": "sha256-zE11fbcG2CeLl1Zi+NJgMOfWpdjuUWNte+icrtAO58I=",
     "./_framework/dotnet.runtime.2tx45g8lli.js": "sha256-2lZh9yO0fnzm3Xt7yV+Kox3DH3nK7L8hDhm84VT1xco=",
@@ -62,6 +62,8 @@
 <body>
     <div id="app">
         <div class="glass-splash">
+            <img src="logo.svg" alt="GlassHub"
+                style="width: 80px; height: 80px; margin-bottom: 24px; animation: float 3s ease-in-out infinite" />
             <div class="glass-spinner"></div>
             <div class="glass-text">Carregando GlassHub</div>
         </div>
@@ -134,6 +136,18 @@
 
             50% {
                 opacity: .5;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
             }
         }
 

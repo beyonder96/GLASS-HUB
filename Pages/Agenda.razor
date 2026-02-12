@@ -170,7 +170,7 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="font-bold text-slate-900 dark:text-white text-sm">@FormatCurrency(item.Value)</p>
-                                    <p class="text-[10px] uppercase font-bold @GetStatusTextColor(item.Status)">@item.Status.ToString()</p>
+                                    <p class="text-[10px] uppercase font-bold @GetStatusTextColor(item.Status)">@TranslateStatus(item.Status)</p>
                                 </div>
                             </div>
                         }
@@ -470,6 +470,16 @@
              PaymentStatus.PAID => "text-emerald-500",
              PaymentStatus.OVERDUE => "text-rose-500",
              _ => "text-indigo-500"
+         };
+    }
+
+    private string TranslateStatus(PaymentStatus status)
+    {
+         return status switch 
+         {
+             PaymentStatus.PAID => "Pago",
+             PaymentStatus.OVERDUE => "Atrasado",
+             _ => "Pendente"
          };
     }
 

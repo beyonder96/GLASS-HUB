@@ -1,7 +1,12 @@
 @inject IExpenseService ExpenseService
 @inject NotificationService NotificationService
+@inject NavigationManager Navigation // Keep this, it was already there but ensure it's injected
+@implements IDisposable
+@inject IJSRuntime JS
 @using System.IO
+@using GlassHub.Components
 
+<!-- Main Nav Container -->
 <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
     
     @if(IsUploading)
@@ -23,7 +28,9 @@
 
     <div class="flex items-center p-2 gap-1 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-3xl border border-white/50 dark:border-white/10 rounded-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-black/80 ring-1 ring-black/5 dark:ring-white/5 transition-all duration-300 hover:scale-[1.02]">
         
-        <NavLink href="" Match="NavLinkMatch.All" class="nav-pill">
+        @if (!IsFiscalMode)
+        {
+            <NavLink href="" Match="NavLinkMatch.All" class="nav-pill">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
             <span class="text-xs font-bold nav-text">Painel</span>
         </NavLink>
@@ -56,10 +63,47 @@
         
         <div class="w-px h-8 bg-slate-200 dark:bg-zinc-800 mx-1"></div>
 
+
+
         <NavLink href="notas" class="nav-pill">
              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
              <span class="text-xs font-bold nav-text">Notas</span>
         </NavLink>
+
+        <!-- Changed to NavLink for dedicated page -->
+            <NavLink href="settings" class="nav-pill">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                 <span class="text-xs font-bold nav-text">Ajustes</span>
+            </NavLink>
+        }
+        else
+        {
+            <!-- Fiscal Menu Items -->
+            <NavLink href="fiscal" Match="NavLinkMatch.All" class="nav-pill">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                <span class="text-xs font-bold nav-text">Painel</span>
+            </NavLink>
+
+            <NavLink href="fiscal/obligations" class="nav-pill">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                <span class="text-xs font-bold nav-text">Obrigações</span>
+            </NavLink>
+
+            <NavLink href="fiscal/analise" class="nav-pill">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <span class="text-xs font-bold nav-text">Analisar</span>
+            </NavLink>
+
+            <NavLink href="fiscal/configuracoes" class="nav-pill">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span class="text-xs font-bold nav-text">Ajustes</span>
+            </NavLink>
+        }
+
+        <button @onclick="() => IsLogoutConfirmVisible = true" class="nav-pill text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10">
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+             <span class="text-xs font-bold nav-text">Sair</span>
+        </button>
     </div>
 
     <AddExpenseModal @bind-IsVisible="IsManualExpenseVisible" />
@@ -67,6 +111,32 @@
     <!-- InputFile must be here, always present in DOM -->
     <InputFile id="xmlFileUpload" OnChange="@LoadFiles" multiple accept=".xml" class="hidden" />
 </div>
+
+<!-- Logout Confirmation Modal - Moved OUTSIDE the transformed container -->
+@if (IsLogoutConfirmVisible)
+{
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center relative animate-scale-in" @onclick:stopPropagation>
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-500/10 mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600 dark:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Deseja realmente sair?</h3>
+            <p class="text-sm text-slate-500 dark:text-zinc-400 mb-8">
+                Você será desconectado e precisará fazer login novamente para acessar sua conta.
+            </p>
+            <div class="grid grid-cols-2 gap-3">
+                <button @onclick="() => IsLogoutConfirmVisible = false" class="py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors text-sm">
+                    Cancelar
+                </button>
+                <button @onclick="ConfirmLogout" class="py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-colors shadow-lg shadow-red-500/30 text-sm">
+                    Sim, Sair
+                </button>
+            </div>
+        </div>
+    </div>
+}
 
 <style>
     .nav-text { display: none; }
@@ -98,17 +168,50 @@
     .nav-pill.active .nav-text { display: block; animation: fadeIn 0.3s; }
     
     @@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .animate-scale-in {
+        animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @@keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
 </style>
 
 @code {
     private bool IsUploading = false;
     private bool IsManualExpenseVisible = false;
+    private bool IsLogoutConfirmVisible = false;
     
     // Upload Progress State
     private int TotalFiles = 0;
     private int ProcessedFiles = 0;
     private string CurrentFileName = "";
     private int ProgressPercent => TotalFiles == 0 ? 0 : (int)((double)ProcessedFiles / TotalFiles * 100);
+
+    private bool IsFiscalMode => Navigation.Uri.Contains("/fiscal", StringComparison.OrdinalIgnoreCase);
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+
+    private void ConfirmLogout()
+    {
+        IsLogoutConfirmVisible = false;
+        // In a real app we might clear tokens here
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
 
     #region Upload Logic
 
@@ -146,10 +249,10 @@
                     await stream.CopyToAsync(ms);
                     ms.Position = 0;
                     
-                    var invoice = await XmlParser.ParseAsync(ms, file.Name);
-                    if (invoice != null)
+                    var result = await XmlParser.ParseAsync(ms, file.Name);
+                    if (result.Invoice != null)
                     {
-                        newInvoices.Add(invoice);
+                        newInvoices.Add(result.Invoice);
                     }
                 }
                 catch (Exception ex)

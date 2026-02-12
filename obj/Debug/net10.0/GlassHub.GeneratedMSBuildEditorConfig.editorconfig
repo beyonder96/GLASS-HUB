@@ -36,8 +36,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xBZGRFeHBlbnNlTW9kYWwucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Components/SettingsModal.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTZXR0aW5nc01vZGFsLnJhem9y
+[C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Components/Fiscal/DanfeView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGaXNjYWxcRGFuZmVWaWV3LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Components/Fiscal/ObrigationModal.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xGaXNjYWxcT2JyaWdhdGlvbk1vZGFsLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Components/StatsCard.razor]
@@ -48,8 +52,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTdGF0dXNCYWRnZS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Components/XmlUploader.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xYbWxVcGxvYWRlci5yYXpvcg==
+[C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Layout/AuthLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XEF1dGhMYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Layout/EmptyLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XEVtcHR5TGF5b3V0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Layout/FloatingNav.razor]
@@ -64,12 +72,32 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWdlbmRhLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Pages/Fiscal/Analise.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRmlzY2FsXEFuYWxpc2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Pages/Fiscal/Configuracoes.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRmlzY2FsXENvbmZpZ3VyYWNvZXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Pages/Fiscal/Dashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRmlzY2FsXERhc2hib2FyZC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Pages/Fiscal/Obrigations.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRmlzY2FsXE9icmlnYXRpb25zLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Pages/Fluxo.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRmx1eG8ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Pages/Home.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Pages/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9naW4ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/kenne/OneDrive/Documentos/Projetos/GLASS HUB/Pages/Notas.razor]

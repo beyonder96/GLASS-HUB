@@ -1,17 +1,50 @@
 ﻿@inherits LayoutComponentBase
+@inject CompanyService CompanyService
+@inject NavigationManager Navigation
 
 <div class="flex flex-col min-h-screen text-slate-800 dark:text-zinc-100 font-sans selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-500 bg-slate-50 dark:bg-black overflow-x-hidden relative">
     
     <!-- Mesh Background Blobs -->
     <div class="mesh-blob blob-1"></div>
-    <div class="mesh-blob blob-2"></div>
+    <div class="mesh-blob blob-2" style="background-color: @(CompanyService.ActiveCompany?.ThemeColor ?? "transparent"); opacity: 0.15"></div>
     <div class="mesh-blob blob-3"></div>
 
     <Header />
 
-    <main class="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-12 py-10 pb-40 relative z-10 transition-all duration-500">
+    <main class="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-12 py-10 pb-40 relative z-10 transition-all duration-500 @(isEntering ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0")">
         @Body
     </main>
 
     <FloatingNav />
 </div>
+
+@code {
+    private bool isEntering = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CompanyService.OnChange += StateHasChanged;
+        
+        if (CompanyService.ActiveCompany == null)
+        {
+            await CompanyService.InitializeAsync();
+            
+            // Still null after init and not on select page? Redirect.
+            var uri = Navigation.Uri;
+            if (CompanyService.ActiveCompany == null && !uri.Contains("/select-company") && !uri.Contains("/login") && !uri.Contains("/register"))
+            {
+                Navigation.NavigateTo("/select-company");
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(100);
+            isEntering = false;
+            StateHasChanged();
+        }
+    }
+}

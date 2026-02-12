@@ -1,0 +1,211 @@
+@using GlassHub.Models
+@using System.Globalization
+
+@if (IsVisible)
+{
+    <div class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 print:p-0 print:bg-white print:static print:inset-auto print:block">
+        <div class="bg-white text-black w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl relative print:w-full print:max-w-none print:max-h-none print:rounded-none print:shadow-none print:overflow-visible">
+            
+            <!-- Toolbar (Hidden on Print) -->
+            <div class="sticky top-0 bg-slate-100 border-b border-slate-200 p-4 flex justify-between items-center print:hidden z-10">
+                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                    Espelho da Nota Fiscal (Simulação Corrigida)
+                </h3>
+                <div class="flex gap-3">
+                    <button @onclick="Print" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-sm shadow-md transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                        Imprimir / Salvar PDF
+                    </button>
+                    <button @onclick="Close" class="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg font-bold text-sm transition-colors">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+
+            <!-- DANFE Content -->
+            <div class="p-8 print:p-0 font-sans text-[10px] leading-tight text-black relative">
+                <!-- Watermark -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5 print:opacity-10 z-0 overflow-hidden">
+                    <div class="-rotate-45 text-9xl font-black text-slate-900 whitespace-nowrap select-none">SIMULAÇÃO CORRIGIDA</div>
+                </div>
+
+                <div class="border border-black relative z-10 bg-white">
+                    <!-- Header -->
+                    <div class="grid grid-cols-[auto_1fr_auto] border-b border-black">
+                        <div class="p-2 border-r border-black w-32 flex items-center justify-center font-bold text-center">
+                            @if(Invoice != null) { <span>IDENTIFICAÇÃO DO EMITENTE</span> }
+                        </div>
+                        <div class="p-2 border-r border-black flex flex-col justify-center">
+                            <h1 class="font-bold text-lg">DANFE</h1>
+                            <div class="text-[9px]">Documento Auxiliar da Nota Fiscal Eletrônica</div>
+                            <div class="flex gap-4 mt-1">
+                                <div>0 - Entrada</div>
+                                <div class="font-bold">1 - Saída</div>
+                            </div>
+                            <div class="mt-1 font-mono font-bold text-sm">Nº @Invoice?.Number</div>
+                            <div class="font-mono">SÉRIE 1</div>
+                        </div>
+                        <div class="p-2 w-80 text-center">
+                             <div class="font-mono text-xs break-all mb-1">@Invoice?.AccessKey</div>
+                             <div class="border-t border-black pt-1">
+                                 CHAVE DE ACESSO
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Natureza -->
+                    <div class="border-b border-black grid grid-cols-2">
+                        <div class="p-1 border-r border-black">
+                            <div class="text-[8px] uppercase">Natureza da Operação</div>
+                            <div class="font-bold">@Invoice?.NatureOfOperation</div>
+                        </div>
+                        <div class="p-1">
+                            <div class="text-[8px] uppercase">Protocolo de Autorização de Uso</div>
+                            <div class="font-bold">123456789012345 (Simulação)</div>
+                        </div>
+                    </div>
+
+                    <!-- Destinatário / Remetente -->
+                    <div class="bg-slate-100 border-b border-black p-1 font-bold">DESTINATÁRIO / REMETENTE</div>
+                    <div class="border-b border-black grid grid-cols-[3fr_1fr_1fr]">
+                        <div class="p-1 border-r border-black">
+                            <div class="text-[8px]">Nome / Razão Social</div>
+                            <div class="font-bold truncate">@Invoice?.RecipientName</div>
+                        </div>
+                        <div class="p-1 border-r border-black">
+                            <div class="text-[8px]">CNPJ / CPF</div>
+                            <div class="font-bold">@Invoice?.RecipientTaxId</div>
+                        </div>
+                        <div class="p-1">
+                            <div class="text-[8px]">Data da Emissão</div>
+                            <div class="font-bold">@Invoice?.IssueDate.ToString("dd/MM/yyyy")</div>
+                        </div>
+                    </div>
+
+                    <!-- Imposto -->
+                    <div class="bg-slate-100 border-b border-black p-1 font-bold">CÁLCULO DO IMPOSTO</div>
+                    <div class="border-b border-black grid grid-cols-5 divide-x divide-black">
+                        <div class="p-1">
+                            <div class="text-[8px]">Base de Cálculo do ICMS</div>
+                            <div class="font-bold text-right">@FormatMoney(Invoice?.IcmsBase)</div>
+                        </div>
+                        <div class="p-1">
+                            <div class="text-[8px]">Valor do ICMS</div>
+                            <div class="font-bold text-right">@FormatMoney(Invoice?.IcmsValue)</div>
+                        </div>
+                        <div class="p-1">
+                            <div class="text-[8px]">Base de Cálculo do ICMS ST</div>
+                            <div class="font-bold text-right">@FormatMoney(Invoice?.IcmsStBase)</div>
+                        </div>
+                        <div class="p-1">
+                            <div class="text-[8px]">Valor do ICMS ST</div>
+                            <div class="font-bold text-right">@FormatMoney(Invoice?.IcmsStValue)</div>
+                        </div>
+                        <div class="p-1 bg-slate-50">
+                            <div class="text-[8px]">Valor Total dos Produtos</div>
+                            <div class="font-bold text-right">@FormatMoney(Invoice?.ProductsValue)</div>
+                        </div>
+                    </div>
+                    <div class="border-b border-black grid grid-cols-5 divide-x divide-black">
+                        <div class="p-1">
+                            <div class="text-[8px]">Valor do Frete</div>
+                            <div class="font-bold text-right">@FormatMoney(Invoice?.FreightValue)</div>
+                        </div>
+                        <div class="p-1">
+                            <div class="text-[8px]">Valor do Seguro</div>
+                            <div class="font-bold text-right">@FormatMoney(Invoice?.InsuranceValue)</div>
+                        </div>
+                        <div class="p-1">
+                            <div class="text-[8px]">Desconto</div>
+                            <div class="font-bold text-right">@FormatMoney(Invoice?.DiscountValue)</div>
+                        </div>
+                        <div class="p-1">
+                            <div class="text-[8px]">Outras Despesas</div>
+                            <div class="font-bold text-right">@FormatMoney(Invoice?.OtherExpensesValue)</div>
+                        </div>
+                         <div class="p-1 bg-slate-100">
+                            <div class="text-[8px] font-bold">VALOR TOTAL DA NOTA</div>
+                            <div class="font-black text-right text-sm">@FormatMoney(Invoice?.TotalValue)</div>
+                        </div>
+                    </div>
+
+                    <!-- Dados dos Produtos -->
+                    <div class="bg-slate-100 border-b border-black p-1 font-bold mb-0">DADOS DOS PRODUTOS / SERVIÇOS</div>
+                    
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-black">
+                                <th class="p-1 border-r border-black w-16">CÓDIGO</th>
+                                <th class="p-1 border-r border-black">DESCRIÇÃO</th>
+                                <th class="p-1 border-r border-black w-10 text-center">NCM</th>
+                                <th class="p-1 border-r border-black w-8 text-center">CST</th>
+                                <th class="p-1 border-r border-black w-8 text-center">CFOP</th>
+                                <th class="p-1 border-r border-black w-8 text-center">UNID</th>
+                                <th class="p-1 border-r border-black w-12 text-right">QTD.</th>
+                                <th class="p-1 border-r border-black w-16 text-right">V.UNIT</th>
+                                <th class="p-1 border-r border-black w-16 text-right">V.TOTAL</th>
+                                <th class="p-1 border-r border-black w-16 text-right">BC.ICMS</th>
+                                <th class="p-1 border-r border-black w-12 text-right">V.ICMS</th>
+                                <th class="p-1 border-r border-black w-12 text-right">V.IPI</th>
+                                <th class="p-1 text-right w-10">%ICMS</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-black/20">
+                            @if (Invoice?.Items != null)
+                            {
+                                @foreach(var item in Invoice.Items)
+                                {
+                                    <tr class="odd:bg-white even:bg-slate-50/50">
+                                        <td class="p-1 border-r border-black/20 font-mono text-[9px]">@item.Code</td>
+                                        <td class="p-1 border-r border-black/20 truncate max-w-[200px]">@item.Name</td>
+                                        <td class="p-1 border-r border-black/20 text-center">@item.Ncm</td>
+                                        <td class="p-1 border-r border-black/20 text-center">@((string.IsNullOrEmpty(item.Cst) ? item.Csosn : item.Cst))</td>
+                                        <td class="p-1 border-r border-black/20 text-center">@item.Cfop</td>
+                                        <td class="p-1 border-r border-black/20 text-center">@item.Unit</td>
+                                        <td class="p-1 border-r border-black/20 text-right">@item.Quantity.ToString("N2")</td>
+                                        <td class="p-1 border-r border-black/20 text-right">@item.UnitPrice.ToString("N2")</td>
+                                        <td class="p-1 border-r border-black/20 text-right font-bold">@item.TotalValue.ToString("N2")</td>
+                                        <td class="p-1 border-r border-black/20 text-right text-slate-500">@item.IcmsBase.ToString("N2")</td>
+                                        <td class="p-1 border-r border-black/20 text-right text-slate-500">@item.IcmsValue.ToString("N2")</td>
+                                        <td class="p-1 border-r border-black/20 text-right text-slate-500">@item.IpiValue.ToString("N2")</td>
+                                         <td class="p-1 text-right text-slate-500">@item.IcmsRate.ToString("N0")%</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                     <!-- Spacer to fill page if needed -->
+                    <div class="h-10 border-t border-black p-2 text-[8px] italic text-slate-500">
+                        Continua...
+                    </div>
+                </div>
+                
+                <div class="mt-2 text-[8px] text-slate-500 text-center">
+                    Documento gerado eletronicamente para fins de conferência (Simulação Fiscal). Não possui valor fiscal oficial.
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public Invoice? Invoice { get; set; }
+    
+    [Inject] IJSRuntime JSRuntime { get; set; } = default!;
+
+    private void Close()
+    {
+        IsVisible = false;
+        IsVisibleChanged.InvokeAsync(false);
+    }
+
+    private async Task Print()
+    {
+        await JSRuntime.InvokeVoidAsync("print");
+    }
+
+    private string FormatMoney(decimal? value) => (value ?? 0).ToString("N2", new CultureInfo("pt-BR"));
+}

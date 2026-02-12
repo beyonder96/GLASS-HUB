@@ -1,0 +1,53 @@
+@inherits LayoutComponentBase
+
+<div class="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden transition-colors duration-500 bg-slate-50 dark:bg-black">
+    
+    <!-- Mesh Background Blobs (using global classes) -->
+    <div class="mesh-blob blob-1"></div>
+    <div class="mesh-blob blob-2"></div>
+    <div class="mesh-blob blob-3"></div>
+
+    <!-- Floating particles for premium feel -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[15%] left-[10%] w-32 h-32 bg-indigo-500/10 rounded-full blur-[80px] animate-pulse"></div>
+        <div class="absolute bottom-[10%] right-[10%] w-40 h-40 bg-emerald-500/10 rounded-full blur-[100px] animate-pulse" style="animation-delay: 2s"></div>
+    </div>
+
+    <div class="w-full max-w-[440px] relative z-10">
+        <!-- Brand Logo/Name -->
+        <div class="mb-10 text-center animate-in fade-in slide-in-from-top-4 duration-700">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-xl mb-4 group hover:scale-110 transition-transform duration-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-900 dark:text-white group-hover:rotate-12 transition-transform duration-500">
+                    <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
+                </svg>
+            </div>
+            <h1 class="text-xl font-black tracking-[0.2em] text-slate-900 dark:text-white uppercase">Glass Hub</h1>
+        </div>
+
+        <!-- Main Content -->
+        <main class="animate-in fade-in slide-in-from-bottom-8 duration-700">
+            @Body
+        </main>
+
+        <!-- Footer -->
+        <div class="mt-12 text-center">
+            <p class="text-[10px] font-medium tracking-widest text-slate-400 dark:text-zinc-600 uppercase">
+                &copy; @DateTime.Now.Year Glass Hub Assistant &bull; Crafted with Precision
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    [class*="animate-in"] {
+        animation-fill-mode: both;
+    }
+
+    .animate-in.fade-in { animation: fadeIn 0.8s ease-out; }
+    .animate-in.slide-in-from-bottom-8 { animation: slideInFromBottom 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+    .animate-in.slide-in-from-top-4 { animation: slideInFromTop 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    @@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @@keyframes slideInFromBottom { from { transform: translateY(2rem); } to { transform: translateY(0); } }
+    @@keyframes slideInFromTop { from { transform: translateY(-1rem); } to { transform: translateY(0); } }
+</style>

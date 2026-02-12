@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+    <filter id="glassEffect" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="12" result="blur" />
+      <feOffset in="blur" dx="0" dy="10" result="offsetBlur" />
+      <feSpecularLighting in="blur" surfaceScale="5" specularConstant="1.2" specularExponent="20" lighting-color="#ffffff" result="spec">
+        <fePointLight x="-5000" y="-10000" z="20000" />
+      </feSpecularLighting>
+      <feComposite in="spec" in2="SourceAlpha" operator="in" result="specOut" />
+      <feComposite in="SourceGraphic" in2="specOut" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litPaint" />
+      <feMerge>
+        <feMergeNode in="offsetBlur" />
+        <feMergeNode in="litPaint" />
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer Rounded Rect (Squircle) -->
+  <rect x="40" y="40" width="432" height="432" rx="120" fill="url(#mainGradient)" filter="url(#glassEffect)" />
+  
+  <!-- Stylized 'G' with geometric precision -->
+  <path d="M360 256 A104 104 0 1 1 256 152 L320 152 V204 L256 204 A52 52 0 1 0 308 256 V240 L260 240 V190 L360 190 V256 Z" 
+        fill="white" 
+        opacity="0.95" />
+        
+  <!-- Emerald Core -->
+  <circle cx="282" cy="221" r="28" fill="#10b981" />
+</svg>

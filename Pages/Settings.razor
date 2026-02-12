@@ -2,110 +2,335 @@
 @using GlassHub.Services
 @inject IJSRuntime JSRuntime
 @inject SettingsService SettingsService
+@inject CompanyService CompanyService
+@implements IDisposable
 
-<div class="animate-fade-in max-w-2xl mx-auto space-y-8 pb-20">
-    <div class="flex items-center gap-4 mb-4">
+<div class="animate-fade-in max-w-7xl mx-auto pb-20 pt-8 px-4">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-8">
         <a href="/" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </a>
-        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Configurações</h1>
+        <h1 class="text-3xl font-bold text-slate-800 dark:text-white">Configurações</h1>
     </div>
 
-    <!-- Tab Nav -->
-    <div class="p-1 bg-slate-100 dark:bg-zinc-900 rounded-xl inline-flex">
-        <button @onclick="@(() => ActiveTab = "PROFILE")" class="@(ActiveTab == "PROFILE" ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-zinc-500") px-6 py-2 rounded-lg text-sm font-bold transition-all">Perfil</button>
-        <button @onclick="@(() => ActiveTab = "FINANCE")" class="@(ActiveTab == "FINANCE" ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-zinc-500") px-6 py-2 rounded-lg text-sm font-bold transition-all">Financeiro</button>
-    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-8 items-start relative">
+        <!-- Sidebar Navigation -->
+        <div class="w-full flex-none space-y-2 sticky top-8 z-10 bg-inherit pb-4 lg:pb-0">
+             <button @onclick="@(() => ActiveTab = "PROFILE")" 
+                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all text-left @(ActiveTab == "PROFILE" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30" : "bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 border border-slate-100 dark:border-zinc-800")">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Perfil & Segurança
+            </button>
+            
+            <button @onclick="@(() => ActiveTab = "FINANCE")" 
+                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all text-left @(ActiveTab == "FINANCE" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30" : "bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 border border-slate-100 dark:border-zinc-800")">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                Financeiro
+            </button>
 
-    <div class="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 rounded-3xl p-8 shadow-xl">
-        
-        @if (ActiveTab == "PROFILE")
-        {
-            <div class="space-y-8 animate-fade-in">
-                <!-- Avatar -->
-                <div class="flex flex-col items-center">
-                    <div class="relative group cursor-pointer w-24 h-24 rounded-full bg-slate-100 dark:bg-zinc-900 border-4 border-white dark:border-zinc-800 overflow-hidden shadow-lg flex items-center justify-center">
-                        @if (!string.IsNullOrEmpty(UserAvatar))
-                        {
-                            <img src="@UserAvatar" class="w-full h-full object-cover" />
-                        }
-                        else
-                        {
-                            <span class="text-3xl font-bold text-slate-300 dark:text-zinc-700">@((UserName.Length >= 2) ? UserName.Substring(0, 2).ToUpper() : "JS")</span>
-                        }
+            <button @onclick="@(() => ActiveTab = "COMPANIES")" 
+                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all text-left @(ActiveTab == "COMPANIES" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30" : "bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 border border-slate-100 dark:border-zinc-800")">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Minhas Empresas
+            </button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="w-full bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl p-8 shadow-xl min-h-[600px] overflow-hidden">
+            
+            @if (ActiveTab == "PROFILE")
+            {
+                <div class="max-w-2xl mx-auto space-y-8 animate-fade-in">
+                    <!-- User Info -->
+                    <div class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nome de Exibição</label>
+                            <input type="text" @bind="UserName" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white transition-all font-medium" />
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email (Somente Leitura)</label>
+                            <div class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 font-medium cursor-not-allowed flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                @UserEmail
+                            </div>
+                        </div>
                         
-                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                             <InputFile OnChange="HandleFileSelected" accept=".jpg,.png,.jpeg" class="absolute inset-0 opacity-0 cursor-pointer" />
+                        <!-- Theme Toggle -->
+                         <div class="pt-6 border-t border-slate-100 dark:border-zinc-800">
+                            <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-black rounded-xl border border-slate-100 dark:border-zinc-800">
+                                <div>
+                                    <p class="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-2">
+                                        @if(SettingsService.IsDarkMode)
+                                        {
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                                            <span>Modo Escuro</span>
+                                        }
+                                        else
+                                        {
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2"/><path d="M12 21v2"/><path d="M4.22 4.22l1.42 1.42"/><path d="M18.36 18.36l1.42 1.42"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="M4.22 19.78l1.42-1.42"/><path d="M18.36 5.64l1.42-1.42"/></svg>
+                                            <span>Modo Claro</span>
+                                        }
+                                    </p>
+                                    <p class="text-xs text-slate-500 dark:text-zinc-500 mt-1">Alternar aparência do aplicativo</p>
+                                </div>
+                                <button @onclick="ToggleTheme" class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 @(SettingsService.IsDarkMode ? "bg-indigo-600" : "bg-slate-200")" role="switch" aria-label="Alternar tema">
+                                    <span class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-300 ease-in-out flex items-center justify-center @(SettingsService.IsDarkMode ? "translate-x-5" : "translate-x-0")">
+                                        @if(SettingsService.IsDarkMode)
+                                        {
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                            </svg>
+                                        }
+                                        else
+                                        {
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                            </svg>
+                                        }
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-100 dark:border-zinc-800 space-y-4">
+                            <div class="flex items-center gap-2 text-slate-800 dark:text-white font-bold text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                Alterar Senha
+                            </div>
+                            
+                            <input type="password" placeholder="Senha Atual" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white transition-all" />
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="password" placeholder="Nova Senha" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white transition-all" />
+                                <input type="password" placeholder="Confirmar Senha" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white transition-all" />
+                            </div>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-400 mt-2">Clique na foto para alterar</p>
                 </div>
+            }
 
-                <div class="space-y-4">
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nome de Exibição</label>
-                        <input type="text" @bind="UserName" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white transition-all" />
+            @if (ActiveTab == "FINANCE")
+            {
+                 <div class="max-w-xl mx-auto space-y-8 animate-fade-in">
+                     <!-- Buffer -->
+                     <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">Buffer Diário</label>
+                             <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400">@Buffer.ToString("C")</span>
+                        </div>
+                        <div class="p-6 bg-slate-50 dark:bg-black rounded-xl border border-slate-100 dark:border-zinc-800">
+                             <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">R$</span>
+                                <input type="text" @bind="FormattedBuffer" @bind:event="oninput" class="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white transition-all font-bold text-lg" placeholder="0,00" />
+                             </div>
+                             
+                             <p class="text-xs text-slate-500 dark:text-zinc-500 mt-4 leading-relaxed bg-white dark:bg-zinc-900 p-3 rounded-lg border border-slate-100 dark:border-zinc-800">
+                                 ℹ️ Este valor será somado automaticamente ao seu fluxo de caixa diário como uma reserva de segurança.
+                             </p>
+                        </div>
+                     </div>
+
+                     <!-- Strategy -->
+                     <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-zinc-800">
+                          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Estratégia de Feriados</label>
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                               <div @onclick="@(() => Strategy = "POSTPONE")" class="cursor-pointer p-4 rounded-xl border-2 transition-all flex items-center gap-4 @(Strategy == "POSTPONE" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" : "border-slate-100 dark:border-zinc-800 hover:border-slate-200 dark:hover:border-zinc-700")">
+                                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center @(Strategy == "POSTPONE" ? "border-indigo-600" : "border-slate-300 dark:border-zinc-600")">
+                                         @if(Strategy == "POSTPONE") { <div class="w-2.5 h-2.5 bg-indigo-600 rounded-full" /> }
+                                    </div>
+                                    <div>
+                                         <p class="font-bold text-sm text-slate-800 dark:text-white">Postergar</p>
+                                         <p class="text-xs text-slate-500">Pagar no próximo dia útil</p>
+                                    </div>
+                               </div>
+
+                               <div @onclick="@(() => Strategy = "ADVANCE")" class="cursor-pointer p-4 rounded-xl border-2 transition-all flex items-center gap-4 @(Strategy == "ADVANCE" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" : "border-slate-100 dark:border-zinc-800 hover:border-slate-200 dark:hover:border-zinc-700")">
+                                    <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center @(Strategy == "ADVANCE" ? "border-indigo-600" : "border-slate-300 dark:border-zinc-600")">
+                                         @if(Strategy == "ADVANCE") { <div class="w-2.5 h-2.5 bg-indigo-600 rounded-full" /> }
+                                    </div>
+                                    <div>
+                                         <p class="font-bold text-sm text-slate-800 dark:text-white">Antecipar</p>
+                                         <p class="text-xs text-slate-500">Pagar no dia anterior</p>
+                                    </div>
+                               </div>
+                          </div>
+                     </div>
+                 </div>
+            }
+
+            @if (ActiveTab == "COMPANIES")
+            {
+                <div class="max-w-2xl mx-auto space-y-6 animate-fade-in">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white">Suas Empresas</h3>
+                        <button @onclick="() => showAddCompany = !showAddCompany" class="px-4 py-2 rounded-xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all">
+                            @(showAddCompany ? "Voltar" : "Adicionar Nova")
+                        </button>
                     </div>
+
+                    @if (showAddCompany)
+                    {
+                        <div class="space-y-6 p-6 bg-slate-50 dark:bg-black rounded-2xl border border-slate-100 dark:border-zinc-800 animate-slide-up">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nome da Empresa</label>
+                                    <input type="text" @bind="newCompanyName" placeholder="Ex: Vidraçaria Glass" class="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white" />
+                                </div>
+                                    <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">CNPJ</label>
+                                    <input type="text" @bind="FormattedCNPJ" @bind:event="oninput" placeholder="00.000.000/0000-00" maxlength="18" class="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white" />
+                                </div>
+                            </div>
+
+                            <!-- Branch Selection -->
+                            <div class="p-4 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 space-y-4">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" @bind="isBranch" class="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 transition-all" />
+                                    <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Esta empresa é uma Filial?</span>
+                                </label>
+
+                                @if (isBranch)
+                                {
+                                    <div class="space-y-2 animate-fade-in">
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Selecione a Matriz</label>
+                                        <select @bind="selectedParentId" class="w-full px-4 py-2.5 rounded-lg bg-slate-50 dark:bg-black border border-slate-200 dark:border-zinc-800 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white">
+                                            <option value="">Selecione uma empresa...</option>
+                                            @foreach (var company in CompanyService.UserCompanies.Where(c => c.IsHeadOffice))
+                                            {
+                                                <option value="@company.Id">@company.Name (@Convert.ToUInt64(new string(company.TaxId.Where(char.IsDigit).ToArray())).ToString(@"00\.000\.000\/0000\-00"))</option>
+                                            }
+                                        </select>
+                                        <p class="text-xs text-slate-400">A nova empresa será vinculada hierarquicamente à Matriz selecionada.</p>
+                                    </div>
+                                }
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Cor de Destaque</label>
+                                <div class="flex gap-3">
+                                    @foreach (var color in themeColors)
+                                    {
+                                        <button @onclick="() => newCompanyColor = color" class="h-8 w-8 rounded-full border-2 transition-all transform @(newCompanyColor == color ? "border-white scale-125 shadow-lg" : "border-transparent opacity-60 hover:opacity-100")" style="background-color: @color"></button>
+                                    }
+                                </div>
+                            </div>
+                            <button @onclick="CreateCompany" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all shadow-lg shadow-indigo-500/20 text-sm">
+                                Criar Empresa
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="space-y-3">
+                            @{
+                                var recursedCompanies = new HashSet<string>();
+                                var headOffices = CompanyService.UserCompanies.Where(c => c.IsHeadOffice).OrderBy(c => c.Name).ToList();
+                            }
+
+                            @foreach (var matriz in headOffices)
+                            {
+                                recursedCompanies.Add(matriz.Id);
+                                var branches = CompanyService.UserCompanies.Where(c => c.ParentCompanyId == matriz.Id).OrderBy(c => c.TaxId).ToList();
+
+                                <!-- MATRIZ CARD -->
+                                <div class="group flex items-center justify-between p-4 bg-white dark:bg-black border border-slate-100 dark:border-zinc-800 rounded-2xl hover:border-indigo-500/50 transition-all relative z-10">
+                                    <div class="flex items-center gap-4">
+                                        <div class="h-12 w-12 rounded-xl flex items-center justify-center text-white font-bold shadow-lg" style="background-color: @matriz.ThemeColor">
+                                            @matriz.Name.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <p class="font-bold text-slate-800 dark:text-white text-sm">@matriz.Name</p>
+                                                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">Matriz</span>
+                                            </div>
+                                            <p class="text-xs text-slate-400 font-medium pt-1">
+                                                @Convert.ToUInt64(new string(matriz.TaxId.Where(char.IsDigit).ToArray())).ToString(@"00\.000\.000\/0000\-00")
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 mr-2">
+                                        @if (CompanyService.ActiveCompany?.Id == matriz.Id)
+                                        {
+                                            <span class="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-tighter">Ativa</span>
+                                        }
+                                        <button @onclick="() => CompanyService.SelectCompany(matriz)" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 hover:text-indigo-600 transition-colors" title="Selecionar Empresa">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- FILIAIS (BRANCHES) -->
+                                @if (branches.Any())
+                                {
+                                    <div class="ml-8 pl-8 border-l-2 border-slate-100 dark:border-zinc-800 space-y-3 -mt-4 pt-6 pb-2">
+                                        @foreach (var filial in branches)
+                                        {
+                                            recursedCompanies.Add(filial.Id);
+                                            <div class="group flex items-center justify-between p-3 bg-slate-50 dark:bg-zinc-900/50 border border-slate-100 dark:border-zinc-800 rounded-xl hover:border-indigo-500/30 transition-all">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="h-8 w-8 rounded-lg flex items-center justify-center text-white text-xs font-bold opacity-70" style="background-color: @filial.ThemeColor">
+                                                        @filial.Name.Substring(0, 1).ToUpper()
+                                                    </div>
+                                                    <div>
+                                                        <div class="flex items-center gap-2">
+                                                            <p class="font-bold text-slate-700 dark:text-slate-200 text-xs">@filial.Name</p>
+                                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">Filial</span>
+                                                        </div>
+                                                        <p class="text-[10px] text-slate-400 font-medium pt-0.5">
+                                                            @Convert.ToUInt64(new string(filial.TaxId.Where(char.IsDigit).ToArray())).ToString(@"00\.000\.000\/0000\-00")
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2 mr-2">
+                                                    @if (CompanyService.ActiveCompany?.Id == filial.Id)
+                                                    {
+                                                        <span class="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase tracking-tighter">Ativa</span>
+                                                    }
+                                                    <button @onclick="() => CompanyService.SelectCompany(filial)" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-indigo-600 transition-colors" title="Selecionar Empresa">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            }
+                            
+                            <!-- Orpahns/Fallbacks (Shouldn't happen with current logic but good for safety) -->
+                            @foreach(var orphan in CompanyService.UserCompanies.Where(c => !recursedCompanies.Contains(c.Id)))
+                            {
+                                 <div class="group flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl">
+                                    <div class="flex items-center gap-4">
+                                        <div class="h-12 w-12 rounded-xl flex items-center justify-center text-white font-bold shadow-lg bg-red-500">
+                                            ?
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-800 dark:text-white text-sm">@orphan.Name</p>
+                                            <p class="text-xs text-red-400 font-medium pt-1">Erro de Vínculo: @orphan.TaxId</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
                 </div>
-            </div>
-        }
+            }
 
-        @if (ActiveTab == "FINANCE")
-        {
-             <div class="space-y-8 animate-fade-in">
-                 <!-- Buffer -->
-                 <div class="space-y-4">
-                    <div class="flex justify-between items-center">
-                         <label class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">Buffer Diário</label>
-                         <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400">@Buffer.ToString("C")</span>
-                    </div>
-                    <div class="p-4 bg-slate-50 dark:bg-zinc-900 rounded-xl border border-slate-100 dark:border-zinc-800">
-                         <input type="range" min="0" max="10000" step="100" @bind="Buffer" @bind:event="oninput" class="w-full h-2 bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
-                         <p class="text-[10px] text-slate-400 mt-2">Valor de segurança adicionado às previsões.</p>
-                    </div>
-                 </div>
-
-                 <!-- Strategy -->
-                 <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-zinc-800">
-                      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Estratégia de Feriados</label>
-                      <div class="space-y-3">
-                           <div @onclick="@(() => Strategy = "POSTPONE")" class="cursor-pointer p-4 rounded-xl border-2 transition-all flex items-center gap-4 @(Strategy == "POSTPONE" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" : "border-slate-100 dark:border-zinc-800")">
-                                <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center @(Strategy == "POSTPONE" ? "border-indigo-600" : "border-slate-300")">
-                                     @if(Strategy == "POSTPONE") { <div class="w-2.5 h-2.5 bg-indigo-600 rounded-full" /> }
-                                </div>
-                                <div>
-                                     <p class="font-bold text-sm text-slate-800 dark:text-white">Postergar</p>
-                                     <p class="text-xs text-slate-500">Pagar no próximo dia útil</p>
-                                </div>
-                           </div>
-
-                           <div @onclick="@(() => Strategy = "ADVANCE")" class="cursor-pointer p-4 rounded-xl border-2 transition-all flex items-center gap-4 @(Strategy == "ADVANCE" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" : "border-slate-100 dark:border-zinc-800")">
-                                <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center @(Strategy == "ADVANCE" ? "border-indigo-600" : "border-slate-300")">
-                                     @if(Strategy == "ADVANCE") { <div class="w-2.5 h-2.5 bg-indigo-600 rounded-full" /> }
-                                </div>
-                                <div>
-                                     <p class="font-bold text-sm text-slate-800 dark:text-white">Antecipar</p>
-                                     <p class="text-xs text-slate-500">Pagar no dia anterior</p>
-                                </div>
-                           </div>
-                      </div>
-                 </div>
-             </div>
-        }
-
+        </div>
     </div>
     
-    <div class="flex justify-end">
-        <button @onclick="SaveSettings" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 transition-all active:scale-95">
-            Salvar Alterações
+    <div class="flex justify-end mt-8">
+        <button @onclick="SaveSettings" class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 transition-all active:scale-95 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Salvar Tudo
         </button>
     </div>
     
     <!-- Success Toast -->
     @if(ShowSuccessMessage)
     {
-        <div class="fixed bottom-8 right-8 bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-fade-in-up z-50">
+        <div class="fixed bottom-8 right-8 bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-fade-in-up z-[100]">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             <div>
                 <h4 class="font-bold text-sm">Sucesso!</h4>
@@ -118,33 +343,131 @@
 @code {
     private string ActiveTab = "PROFILE";
     private decimal Buffer = 1000;
+    
+    // Currency Mask Logic
+    private string FormattedBuffer
+    {
+        get => Buffer.ToString("N2", new System.Globalization.CultureInfo("pt-BR"));
+        set
+        {
+            // Remove everything that is not a digit
+            string digits = new string(value.Where(char.IsDigit).ToArray());
+            if (string.IsNullOrEmpty(digits))
+            {
+                Buffer = 0;
+            }
+            else
+            {
+                if (decimal.TryParse(digits, out decimal result))
+                {
+                    Buffer = result / 100;
+                }
+            }
+        }
+    }
+
     private string Strategy = "POSTPONE";
     
     // Profile Data
-    private string UserName = "João Silva";
+    private string UserName = "";
+    private string UserEmail = "";
     private string? UserAvatar;
+    
+    // Company Tab State
+    private bool showAddCompany = false;
+    private bool isBranch = false;
+    private string selectedParentId = "";
+    private string newCompanyName = "";
+    private string newCompanyCNPJ = "";
+    private string newCompanyColor = "#3b82f6";
+
+    // CNPJ Mask Logic
+    private string FormattedCNPJ
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(newCompanyCNPJ)) return "";
+            
+            // Apply partial mask
+            string digits = new string(newCompanyCNPJ.Where(char.IsDigit).ToArray());
+            
+            if (digits.Length <= 2) return digits;
+            if (digits.Length <= 5) return $"{digits.Substring(0, 2)}.{digits.Substring(2)}";
+            if (digits.Length <= 8) return $"{digits.Substring(0, 2)}.{digits.Substring(2, 3)}.{digits.Substring(5)}";
+            if (digits.Length <= 12) return $"{digits.Substring(0, 2)}.{digits.Substring(2, 3)}.{digits.Substring(5, 3)}/{digits.Substring(8)}";
+            
+            if (digits.Length > 12)
+            {
+                return $"{digits.Substring(0, 2)}.{digits.Substring(2, 3)}.{digits.Substring(5, 3)}/{digits.Substring(8, 4)}-{digits.Substring(12, Math.Min(2, digits.Length - 12))}";
+            }
+            
+            return digits;
+        }
+        set
+        {
+            if (string.IsNullOrEmpty(value)) 
+            {
+                newCompanyCNPJ = "";
+            }
+            else
+            {
+                // Retrieve only digits for storage
+                newCompanyCNPJ = new string(value.Where(char.IsDigit).ToArray());
+                if (newCompanyCNPJ.Length > 14) newCompanyCNPJ = newCompanyCNPJ.Substring(0, 14);
+            }
+        }
+    }
+
+    private readonly string[] themeColors = { "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899" };
     
     // UI State
     private bool ShowSuccessMessage = false;
 
     protected override async Task OnInitializedAsync()
     {
-        // Load from service (which should be initialized in MainLayout)
-        // If not initialized, we can call it here too, but let's assume MainLayout did it or check properties
-        if (string.IsNullOrEmpty(SettingsService.UserName))
-        {
-            await SettingsService.InitializeAsync();
-        }
-
+        await SettingsService.InitializeAsync();
+        
         UserName = SettingsService.UserName;
+        UserEmail = SettingsService.Email;
         UserAvatar = SettingsService.UserAvatar;
         Buffer = SettingsService.DailyBuffer;
         Strategy = SettingsService.HolidayStrategy;
+        
+        CompanyService.OnChange += StateHasChanged;
+        SettingsService.OnChange += StateHasChanged;
+    }
+    
+    public void Dispose()
+    {
+        CompanyService.OnChange -= StateHasChanged;
+        SettingsService.OnChange -= StateHasChanged;
+    }
+
+    private async Task CreateCompany()
+    {
+        if (string.IsNullOrWhiteSpace(newCompanyName) || string.IsNullOrWhiteSpace(newCompanyCNPJ)) return;
+        
+        // Handle parent ID based on checkbox
+        string? parentId = null;
+        if (isBranch && !string.IsNullOrEmpty(selectedParentId))
+        {
+            parentId = selectedParentId;
+        }
+
+        await CompanyService.AddCompany(newCompanyName, newCompanyCNPJ, newCompanyColor, parentId);
+        
+        // Reset form
+        newCompanyName = "";
+        newCompanyCNPJ = "";
+        isBranch = false;
+        selectedParentId = "";
+        showAddCompany = false;
+        StateHasChanged();
     }
 
     private async Task SaveSettings()
     {
-        await SettingsService.SaveSettingsAsync(UserName, UserAvatar, Buffer, Strategy);
+        await SettingsService.SaveSettingsAsync(UserName, UserEmail, UserAvatar, Buffer, Strategy);
         
         // Show Toast
         ShowSuccessMessage = true;
@@ -153,16 +476,9 @@
         ShowSuccessMessage = false;
         StateHasChanged();
     }
-
-    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    
+    private async Task ToggleTheme()
     {
-        var file = e.File;
-        if (file != null)
-        {
-            var resizedFile = await file.RequestImageFileAsync(file.ContentType, 300, 300);
-            var buffer = new byte[resizedFile.Size];
-            await resizedFile.OpenReadStream().ReadAsync(buffer);
-            UserAvatar = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
-        }
+        await SettingsService.ToggleTheme();
     }
 }

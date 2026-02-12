@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using GlassHub;
 using GlassHub.Services;
+using GlassHub.Services.Fiscal;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -16,6 +17,8 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<SettingsService>();
+builder.Services.AddScoped<CompanyService>();
+builder.Services.AddScoped<ObrigationsService>();
 
 // Configuração do Supabase (Banco de Dados e Auth)
 // Nota: Substitua pelas chaves reais em produção

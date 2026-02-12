@@ -31,4 +31,9 @@ public class ManualExpense
     /// Status do pagamento.
     /// </summary>
     public PaymentStatus Status { get; set; } = PaymentStatus.PENDING;
+
+    /// <summary>
+    /// ID da empresa à qual esta despesa pertence.
+    /// </summary>
+    public string? CompanyId { get; set; }
 }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "YgyzXZtYJ/A=",
+  "dgSpecHash": "yhg+UNuhz9g=",
   "success": true,
   "projectFilePath": "C:\\Users\\kenne\\OneDrive\\Documentos\\Projetos\\GLASS HUB\\GlassHub.csproj",
   "expectedPackageFiles": [
@@ -55,6 +55,7 @@
     "C:\\Users\\kenne\\.nuget\\packages\\system.identitymodel.tokens.jwt\\7.5.1\\system.identitymodel.tokens.jwt.7.5.1.nupkg.sha512",
     "C:\\Users\\kenne\\.nuget\\packages\\system.reactive\\6.0.0\\system.reactive.6.0.0.nupkg.sha512",
     "C:\\Users\\kenne\\.nuget\\packages\\websocket.client\\5.1.1\\websocket.client.5.1.1.nupkg.sha512",
+    "C:\\Users\\kenne\\.nuget\\packages\\zeus.net.nfe.nfce\\2026.2.5.1303\\zeus.net.nfe.nfce.2026.2.5.1303.nupkg.sha512",
     "C:\\Users\\kenne\\.nuget\\packages\\microsoft.netcore.app.runtime.mono.browser-wasm\\10.0.2\\microsoft.netcore.app.runtime.mono.browser-wasm.10.0.2.nupkg.sha512"
   ],
   "logs": []

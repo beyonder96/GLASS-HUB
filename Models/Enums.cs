@@ -20,3 +20,19 @@ public enum PaymentStatus
     /// </summary>
     PAID
 }
+
+/// <summary>
+/// Finalidade da nota fiscal para o destinatário.
+/// </summary>
+public enum InvoicePurpose
+{
+    /// <summary>
+    /// Destinado à revenda (comercialização).
+    /// </summary>
+    REVENDA,
+
+    /// <summary>
+    /// Destinado ao uso ou consumo final.
+    /// </summary>
+    CONSUMO
+}

@@ -449,7 +449,7 @@
         var invoice = ExpenseService.Invoices.FirstOrDefault(i => i.Id == item.InvoiceId);
         var installment = invoice?.Installments.FirstOrDefault(i => i.Id == item.Id);
         
-        if (installment != null)
+        if (installment != null && invoice != null)
         {
             installment.DueDate = EditDueDate;
             installment.Value = EditValue;

@@ -5,7 +5,7 @@ var e=!1;const t=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,
   "mainAssemblyName": "GlassHub",
   "applicationEnvironment": "Development",
   "resources": {
-    "hash": "sha256-CD9kyvKKmfuRYLKtDQdVCjVbUGDDMgxDMcZ2Ez0Tjcc=",
+    "hash": "sha256-AuVJt5Db7IGxXEDTr4CYK7/Yi0QRwEYWgTSVOJdDHT4=",
     "jsModuleNative": [
       {
         "name": "dotnet.native.87vtjjdetb.js"
@@ -332,6 +332,48 @@ var e=!1;const t=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,
         "virtualPath": "Websocket.Client.wasm",
         "name": "Websocket.Client.sntjl98ana.wasm",
         "integrity": "sha256-6BUeDh+wN+tE97n/xZ5FpCYyaVYitXH44JLzRcssrz8=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "DFe.Classes.wasm",
+        "name": "DFe.Classes.9ibkssmeoh.wasm",
+        "integrity": "sha256-QeNU9adq96RdhWVljjub7aWqCwEecxys9jS5G2o0hL8=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "DFe.Utils.wasm",
+        "name": "DFe.Utils.uf6bobeli6.wasm",
+        "integrity": "sha256-Wjm8aH5/Thlye/DCUBPJdMgr2lreWuKeLsugYkJMzY8=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "DFe.Wsdl.wasm",
+        "name": "DFe.Wsdl.s85rsij66c.wasm",
+        "integrity": "sha256-TCcK2mMuG8B0NFi3Mt6xCPyIGXK1LehtDs7m/YLovFo=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "NFe.Classes.wasm",
+        "name": "NFe.Classes.0237noki91.wasm",
+        "integrity": "sha256-OKKMDHbKqKJv8F+ogZoxKl/1Guxd2b/JCId+XoOlftk=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "NFe.Servicos.wasm",
+        "name": "NFe.Servicos.ulul60x3l0.wasm",
+        "integrity": "sha256-MiQazN2Qgn1OE959QgiE07/2dQXN1de9CqBShep9GN0=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "NFe.Utils.wasm",
+        "name": "NFe.Utils.biq9t6r5dc.wasm",
+        "integrity": "sha256-jQwno8tZZPzvyTYluF4DXo7ly5FMH6qP0wJ9og6MV9k=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "NFe.Wsdl.Standard.wasm",
+        "name": "NFe.Wsdl.Standard.8m14sl7n5p.wasm",
+        "integrity": "sha256-0N7l5jyNv/7bopQy//KcM4+5CHU877fIQ8TVwGL/jfs=",
         "cache": "force-cache"
       },
       {
@@ -1356,16 +1398,16 @@ var e=!1;const t=async()=>WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,
       },
       {
         "virtualPath": "GlassHub.wasm",
-        "name": "GlassHub.suln0oiosh.wasm",
-        "integrity": "sha256-nLHa17J0/WvIJgqm9lS0tOX+mE8QVkdRKIe85aHHRHU=",
+        "name": "GlassHub.3lugq4ufnv.wasm",
+        "integrity": "sha256-14gd/kWB7oskhPGKPreGIhlr3W+CjayvA+FBCNBcwtY=",
         "cache": "force-cache"
       }
     ],
     "pdb": [
       {
         "virtualPath": "GlassHub.pdb",
-        "name": "GlassHub.acq0lqzmq1.pdb",
-        "integrity": "sha256-pu0pnzUOVWXC3a4DmWlOzFQ2QJgXhf+sXr1F0xW9Hro=",
+        "name": "GlassHub.8emhjpedwv.pdb",
+        "integrity": "sha256-oKJVAbnsQch+1yBAjn9dymjLp39movnnRl5rDRroRB4=",
         "cache": "force-cache"
       }
     ],
