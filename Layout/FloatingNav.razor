@@ -250,9 +250,13 @@
                     ms.Position = 0;
                     
                     var result = await XmlParser.ParseAsync(ms, file.Name);
-                    if (result.Invoice != null)
+                    if (result.Invoice != null && !result.IsSkipped)
                     {
                         newInvoices.Add(result.Invoice);
+                    }
+                    else if (result.IsSkipped)
+                    {
+                        Console.WriteLine($"[Upload] {file.Name} ignorado: {result.ErrorMessage}");
                     }
                 }
                 catch (Exception ex)

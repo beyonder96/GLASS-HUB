@@ -30,7 +30,8 @@ namespace GlassHub.Services
                 var settings = new System.Xml.XmlReaderSettings 
                 { 
                     DtdProcessing = System.Xml.DtdProcessing.Prohibit,
-                    XmlResolver = null
+                    XmlResolver = null,
+                    Async = true
                 };
 
                 using var reader = System.Xml.XmlReader.Create(xmlStream, settings);
@@ -56,9 +57,10 @@ namespace GlassHub.Services
 
                 // 1. Nature of Operation (Filtering)
                 var natOp = GetValue(root, "natOp").ToUpper();
+                bool isSkipped = false;
                 if (RejectedKeywords.Any(k => natOp.Contains(k)))
                 {
-                    return new ParseResult { IsSkipped = true, ErrorMessage = $"Nota de {natOp} ignorada." };
+                    isSkipped = true;
                 }
 
                 // 2. Access Key
@@ -234,7 +236,7 @@ namespace GlassHub.Services
                     IcmsBase = GetDecimal(icmsTot, "vBC"),
                     IcmsValue = GetDecimal(icmsTot, "vICMS"),
                     IcmsStBase = GetDecimal(icmsTot, "vBCST"),
-                    IcmsStValue = GetDecimal(icmsTot, "vICMSST"),
+                    IcmsStValue = GetDecimal(icmsTot, "vST"),
                     ImpostoAproximado = GetDecimal(icmsTot, "vTotTrib"),
                     
                     Items = items
@@ -301,6 +303,8 @@ namespace GlassHub.Services
                 return new ParseResult
                 {
                     Invoice = invoice,
+                    IsSkipped = isSkipped,
+                    ErrorMessage = isSkipped ? $"Nota de {natOp} filtrada (Garantia/Devolução/Etc)." : null,
                     MissingDuplicates = missingDuplicates,
                     RecipientTaxId = destCnpj,
                     ValidationErrors = validationErrors

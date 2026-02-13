@@ -48,6 +48,14 @@
                         <p class="text-slate-500 dark:text-zinc-400 text-lg max-w-md mx-auto leading-relaxed">
                             Analise notas fiscais com <span class="text-indigo-600 dark:text-indigo-400 font-bold">inteligência fiscal</span> e validação avançada em tempo real.
                         </p>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="mt-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-500 text-left animate-shake">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                <div class="text-sm font-bold">@errorMessage</div>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -89,10 +97,25 @@
                 <div class="animate-fade-in-up">
                     @{
                         var allLogicalErrors = itemErrors.Concat(CurrentAnalysis.ValidationErrors).Distinct().ToList();
-                        bool hasIssues = !validationResult.IsValid || CurrentAnalysis.Discrepancies.Any() || allLogicalErrors.Any();
+                        bool hasCalculatedIssues = CurrentAnalysis.Discrepancies.Any() || allLogicalErrors.Any() || integrityErrors.Any() || calculationErrors.Any();
                     }
 
-                    @if (hasIssues)
+                    @if (validationResult.IsSkipped)
+                    {
+                        <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center justify-between shadow-sm mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-amber-400 font-bold text-sm">Nota Filtrada</h3>
+                                    <p class="text-amber-500/60 text-[10px] uppercase font-bold tracking-widest">@validationResult.ErrorMessage</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (hasCalculatedIssues)
                     {
                         <div class="flex flex-col gap-4">
                             @if (integrityErrors.Any() || calculationErrors.Any() || CurrentAnalysis.Discrepancies.Any())
@@ -362,6 +385,7 @@
     private FiscalAnalysis? CurrentAnalysis;
     private Invoice? CurrentInvoice => CurrentAnalysis?.OriginalInvoice;
     private ParseResult validationResult = new ParseResult();
+    private string? errorMessage;
     
     // Quick helpers
     private IEnumerable<string> integrityErrors => validationResult.ValidationErrors.Where(e => e.Contains("Assinatura") || e.Contains("Chave") || e.Contains("Protocolo"));
@@ -371,32 +395,41 @@
     private async Task HandleFileSelect(InputFileChangeEventArgs e)
     {
         var file = e.File;
+        errorMessage = null;
+
         if (file != null)
         {
             try
             {
                 using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                ms.Position = 0;
+
                 // 1. Initial Parse
-                var result = await XmlParser.ParseAsync(stream, file.Name, InvoicePurpose.REVENDA);
+                var result = await XmlParser.ParseAsync(ms, file.Name, InvoicePurpose.REVENDA);
                 
                 if (result.Invoice != null)
                 {
                     // 2. Perform Deep Analysis
                     CurrentAnalysis = FiscalValidationService.Analyze(result.Invoice);
                     validationResult = result;
-                    
-                    // Add inconsistencies found to validation result if you want them to appear in status banner
-                    // Or keep separate as we did in UI
                 }
                 else
                 {
                    // Handle error
                    validationResult = result;
+                   errorMessage = result.ErrorMessage ?? "Erro desconhecido ao processar o XML.";
                 }
             }
             catch (Exception ex)
             {
+                errorMessage = $"Falha crítica: {ex.Message}";
                 Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                StateHasChanged();
             }
         }
     }
@@ -414,6 +447,7 @@
     {
         CurrentAnalysis = null;
         validationResult = new ParseResult();
+        errorMessage = null;
     }
     
     // ... logic above ...
