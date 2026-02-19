@@ -1,84 +1,84 @@
 # GLASS-HUB
 
-A modern, scalable dashboard application built with C#, HTML, and CSS. GLASS-HUB is designed to provide real-time analytics and fiscal management capabilities with a clean, intuitive user interface.
+Uma aplicação de dashboard moderna e escalável construída com C#, HTML e CSS. GLASS-HUB foi projetada para fornecer recursos de análise em tempo real e gerenciamento fiscal com uma interface de usuário limpa e intuitiva.
 
-## Features
+## Recursos
 
-- **Real-time Dashboard**: Monitor key metrics and data in real-time
-- **Responsive Design**: Works seamlessly across all devices
-- **Component-Based Architecture**: Modular and reusable UI components
-- **Clean Code**: Well-organized codebase with clear separation of concerns
-- **Fiscal Analytics**: Built-in support for fiscal analysis and reporting
+- **Dashboard em Tempo Real**: Monitore métricas e dados chave em tempo real
+- **Design Responsivo**: Funciona perfeitamente em todos os dispositivos
+- **Arquitetura Baseada em Componentes**: Componentes UI modulares e reutilizáveis
+- **Código Limpo**: Base de código bem organizada com separação clara de responsabilidades
+- **Análise Fiscal**: Suporte integrado para análise fiscal e relatórios
 
-## Tech Stack
+## Stack Tecnológico
 
 - **Frontend**: HTML, CSS, JavaScript
 - **Backend**: C# (.NET)
-- **Architecture**: Component-based MVC pattern
+- **Arquitetura**: Padrão MVC baseado em componentes
 
-## Project Structure
+## Estrutura do Projeto
 
 ```
 GLASS-HUB/
-├── Components/       # Reusable UI components
-├── Layout/          # Page layout templates
-├── Models/          # Data models and entities
-├── Pages/           # Page components
-├── Properties/      # Project properties and configuration
-├── Services/        # Business logic and API services
-├── Styles/          # Global stylesheets
-├── wwwroot/         # Static files and public assets
-└── .vscode/         # VS Code configuration
+├── Components/       # Componentes UI reutilizáveis
+├── Layout/          # Templates de layout de página
+├── Models/          # Modelos de dados e entidades
+├── Pages/           # Componentes de página
+├── Properties/      # Propriedades e configuração do projeto
+├── Services/        # Lógica de negócios e serviços de API
+├── Styles/          # Folhas de estilo globais
+├── wwwroot/         # Arquivos estáticos e assets públicos
+└── .vscode/         # Configuração do VS Code
 ```
 
-## Getting Started
+## Começando
 
-### Prerequisites
+### Pré-requisitos
 
-- .NET 6.0 or higher
-- Visual Studio 2022 or VS Code
-- Node.js (optional, for frontend build tools)
+- .NET 6.0 ou superior
+- Visual Studio 2022 ou VS Code
+- Node.js (opcional, para ferramentas de build frontend)
 
-### Installation
+### Instalação
 
-1. Clone the repository:
+1. Clone o repositório:
 ```bash
 git clone https://github.com/beyonder96/GLASS-HUB.git
 cd GLASS-HUB
 ```
 
-2. Install dependencies:
+2. Instale as dependências:
 ```bash
 dotnet restore
 ```
 
-3. Run the application:
+3. Execute a aplicação:
 ```bash
 dotnet run
 ```
 
-4. Open your browser and navigate to `http://localhost:5000`
+4. Abra seu navegador e navegue para `http://localhost:5000`
 
-## Usage
+## Uso
 
-The dashboard provides various views and analytics:
+O dashboard oferece várias visualizações e análises:
 
-- **Dashboard**: Main overview with key metrics
-- **Analytics**: Detailed analysis and reporting
-- **Settings**: Configuration and preferences
+- **Dashboard**: Visão geral principal com métricas chave
+- **Análise**: Análise detalhada e relatórios
+- **Configurações**: Configuração e preferências
 
-## Contributing
+## Contribuindo
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contribuições são bem-vindas! Sinta-se livre para enviar um Pull Request.
 
-## License
+## Licença
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Este projeto está licenciado sob a Licença MIT - consulte o arquivo LICENSE para detalhes.
 
-## Support
+## Suporte
 
-For issues, questions, or suggestions, please open an issue on GitHub.
+Para problemas, dúvidas ou sugestões, abra uma issue no GitHub.
 
 ---
 
-**Last Updated**: February 2026
+**Última Atualização**: Fevereiro de 2026
